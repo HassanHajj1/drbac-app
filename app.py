@@ -22,15 +22,6 @@ def get_db_connection():
     return conn
 
 
-def get_db_connection():
-    conn = psycopg2.connect(
-        dbname='drbac_db',
-        user='drbac_user',
-        password='Admin123@',
-        host='localhost',
-        port='5432'
-    )
-    return conn
  
 # --- No-Cache After Each Response ---
 @app.after_request
