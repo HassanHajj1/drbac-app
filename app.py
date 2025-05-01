@@ -1,0 +1,741 @@
+from flask import Flask, render_template, request, redirect, session, send_file, make_response
+import psycopg2
+import socket
+import datetime
+import csv
+import io
+import ipinfo
+import smtplib
+import requests
+from functools import wraps
+from email.message import EmailMessage
+import re
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+ 
+# --- Database Connection ---
+def get_db_connection():
+    conn = psycopg2.connect(
+        dbname='drbac_db',
+        user='drbac_user',
+        password='Admin123@',
+        host='localhost',
+        port='5432'
+    )
+    return conn
+ 
+# --- No-Cache After Each Response ---
+@app.after_request
+def add_no_cache(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+ 
+# --- Send Alert Email ---
+def send_alert_email(username, ip, country, city, device):
+    msg = EmailMessage()
+    msg['Subject'] = '🚨 DRBAC High-Risk Login Alert'
+    msg['From'] = 'alerts@drbac.local'
+    msg['To'] = 'admin@drbac-system.local'
+    msg.set_content(f'''
+A high-risk login was detected:
+ 
+👤 User: {username}
+🌍 Location: {city}, {country}
+🖥️ IP Address: {ip}
+📱 Device: {device}
+ 
+⚠️ Risk Level: HIGH
+Please review this activity immediately.
+''')
+ 
+    try:
+        with smtplib.SMTP('sandbox.smtp.mailtrap.io', 587) as smtp:
+            smtp.starttls()
+            smtp.login('53a9909633f5fe', '94fe03c1f616b2')
+            smtp.send_message(msg)
+            print('✅ Mailtrap alert sent successfully!')
+    except Exception as e:
+        print(f'❌ Mailtrap send failed: {e}')
+
+# --- Decorator: Login Required ---
+def login_required(role=None):
+    def wrapper(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not session.get('user'):
+                session.clear()
+                return redirect('/')
+            username = session.get('user')
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute('SELECT 1 FROM active_sessions WHERE username = %s', (username,))
+            active = cur.fetchone()
+            cur.close()
+            conn.close()
+            if not active:
+                session.clear()
+                return redirect('/')
+            if role and session.get('role') != role:
+                session.clear()
+                return redirect('/')
+            return f(*args, **kwargs)
+        return decorated_function
+    return wrapper
+ 
+# --- Home ---
+@app.route('/')
+def home():
+    if 'user' in session:
+        return redirect('/dashboard')
+    return make_response(render_template('login.html'))
+ 
+# --- Login ---
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form['username']
+    password = request.form['password']
+ 
+    hostname = socket.gethostname()
+    ip_address = socket.gethostbyname(hostname)
+ 
+    ua = request.user_agent.string.lower()
+    if 'iphone' in ua:
+        device = 'iPhone'
+    elif 'ipad' in ua:
+        device = 'iPad'
+    elif 'android' in ua:
+        device = 'Android Device'
+    elif 'windows' in ua:
+        device = 'Windows PC'
+    elif 'macintosh' in ua or 'mac os' in ua:
+        device = 'Mac'
+    elif 'linux' in ua:
+        device = 'Linux Device'
+    else:
+        device = 'Unknown'
+ 
+    conn = get_db_connection()
+    cur = conn.cursor()
+ 
+# Lockdown Check
+    cur.execute('SELECT active, end_time FROM system_lockdown ORDER BY id DESC LIMIT 1')
+    lockdown = cur.fetchone()
+ 
+    if lockdown:
+        active, end_time = lockdown
+    if active and end_time > datetime.datetime.now():
+        # Check if the user is admin (only admin can login during lockdown)
+        cur.execute('SELECT role FROM users WHERE username = %s', (username,))
+        result = cur.fetchone()
+        if result is None or result[0] != 'admin':
+            cur.close()
+            conn.close()
+            return '🚫 System under emergency lockdown.'
+    
+    # Credential Check
+    cur.execute('SELECT * FROM users WHERE username = %s AND password = %s', (username, password))
+    user = cur.fetchone()
+    if not user:
+        cur.close()
+        conn.close()
+        return '❌ Invalid credentials'
+ 
+    if user[8] != 'active':
+        cur.close()
+        conn.close()
+        return '❌ Your account is suspended or deleted.'
+ 
+    # Multi-Device Check
+    cur.execute('SELECT device FROM active_sessions WHERE username = %s', (username,))
+    existing_session = cur.fetchone()
+    if existing_session:
+        if existing_session[0] != device:
+            cur.close()
+            conn.close()
+            return '❌ Multi-device login detected. Blocked.'
+ 
+    # IP Info
+    access_token = '56dd46be625f08'
+    handler = ipinfo.getHandler(access_token)
+    try:
+        details = handler.getDetails(ip_address)
+        info = details.all
+        country = info.get('country', 'Unknown')
+        city = info.get('city', 'Unknown')
+    except:
+        country = 'Unknown'
+        city = 'Unknown'
+ 
+    # Travel Detection
+    cur.execute('SELECT country, login_time FROM travel_logs WHERE username = %s ORDER BY login_time DESC LIMIT 1', (username,))
+    last_travel = cur.fetchone()
+    now = datetime.datetime.now()
+ 
+    if last_travel:
+        last_country, last_login_time = last_travel
+        if last_country != country:
+            time_difference = (now - last_login_time).total_seconds() / 3600
+            if time_difference <= 6:
+                cur.close()
+                conn.close()
+                return '❌ Travel detected in short time. Contact Admin.'
+ 
+    # Insert Travel Log
+    cur.execute('INSERT INTO travel_logs (username, country, login_time) VALUES (%s, %s, %s)', (username, country, now))
+    conn.commit()
+ 
+    # Insert / Update Active Session
+    cur.execute('''
+        INSERT INTO active_sessions (username, ip, login_time, device)
+        VALUES (%s, %s, %s, %s)
+        ON CONFLICT (username) DO UPDATE SET ip=EXCLUDED.ip, login_time=EXCLUDED.login_time, device=EXCLUDED.device
+    ''', (username, ip_address, now, device))
+    conn.commit()
+ 
+    # Insert into Access Logs
+    role = user[3]
+    risk = 'low' if 8 <= now.hour <= 18 else 'high'
+    if country.lower() != 'lb':
+        risk = 'high'
+ 
+    cur.execute('''
+        INSERT INTO access_logs (username, role, ip, login_time, risk, country, city, device)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    ''', (username, role, ip_address, now.strftime("%Y-%m-%d %H:%M:%S"), risk, country, city, device))
+    conn.commit()
+ 
+    cur.close()
+    conn.close()
+ 
+    # Send Email Alert if Risk is High
+    if risk == 'high':
+        send_alert_email(username, ip_address, country, city, device)
+ 
+    session['user'] = username
+    session['role'] = role
+    session['ip'] = ip_address
+    session['device'] = device
+    session['risk'] = risk
+    session['time_context'] = 'day' if 8 <= now.hour <= 18 else 'night'
+    session['allowed_page'] = 'dashboard'
+ 
+    return redirect('/dashboard')
+ 
+# --- Dashboard ---
+@app.route('/dashboard')
+@login_required()
+def dashboard():
+    session['allowed_page'] = 'dashboard'
+    return make_response(render_template('dashboard.html',
+                           user=session['user'],
+                           role=session['role'],
+                           ip=session['ip'],
+                           device=session['device'],
+                           risk=session['risk'],
+                           time_context=session['time_context']))
+ 
+# --- Admin Logs ---
+@app.route('/admin_logs')
+@login_required(role='admin')
+def admin_logs():
+    session['allowed_page'] = 'admin_logs'
+    conn = get_db_connection()
+    cur = conn.cursor()
+    query = 'SELECT * FROM access_logs WHERE 1=1'
+    filters = []
+ 
+    if request.args.get('risk'):
+        query += ' AND risk = %s'
+        filters.append(request.args.get('risk'))
+ 
+    if request.args.get('date'):
+        query += ' AND DATE(login_time) = %s'
+        filters.append(request.args.get('date'))
+ 
+    query += ' ORDER BY login_time DESC'
+    cur.execute(query, tuple(filters))
+    logs = cur.fetchall()
+    conn.close()
+ 
+    return make_response(render_template('admin_logs.html', logs=logs))
+
+@app.route('/admin_activity_logs')
+@login_required(role='admin')
+def admin_activity_logs():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('SELECT admin_username, action, target_username, action_time FROM admin_logs ORDER BY action_time DESC')
+    logs = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template('admin_activity_logs.html', logs=logs)
+# --- Block User ---
+@app.route('/block_user/<username>')
+@login_required(role='admin')
+def block_user(username):
+    conn = get_db_connection()
+    cur = conn.cursor()
+ 
+    # Block user
+    cur.execute('INSERT INTO blocked_users (username) VALUES (%s) ON CONFLICT DO NOTHING', (username,))
+ 
+    # Log admin action
+    cur.execute('''
+        INSERT INTO admin_logs (admin_username, action, target_username)
+        VALUES (%s, %s, %s)
+    ''', (session['user'], 'Block User', username))
+ 
+    conn.commit()
+    cur.close()
+    conn.close()
+ 
+    return redirect('/admin_logs')
+# --- Unblock User ---
+@app.route('/unblock_user/<username>')
+@login_required(role='admin')
+def unblock_user(username):
+    conn = get_db_connection()
+    cur = conn.cursor()
+ 
+    # Unblock user
+    cur.execute('DELETE FROM blocked_users WHERE username = %s', (username,))
+ 
+    # Log admin action
+    cur.execute('''
+        INSERT INTO admin_logs (admin_username, action, target_username)
+        VALUES (%s, %s, %s)
+    ''', (session['user'], 'Unblock User', username))
+ 
+    conn.commit()
+    cur.close()
+    conn.close()
+ 
+    return redirect('/admin_logs')
+# --- Blocked Users List ---
+@app.route('/blocked_users')
+@login_required(role='admin')
+def blocked_users():
+    session['allowed_page'] = 'blocked_users'
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('SELECT username FROM blocked_users')
+    users = cur.fetchall()
+    conn.close()
+ 
+    return make_response(render_template('blocked_users.html', users=users))
+@app.route('/start_lockdown')
+@login_required(role='admin')
+def start_lockdown():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    now = datetime.datetime.now()
+    end_time = now + datetime.timedelta(hours=6)  # lockdown lasts 6 hours
+    cur.execute('INSERT INTO system_lockdown (active, start_time, end_time) VALUES (TRUE, %s, %s)', (now, end_time))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect('/admin_logs')
+ 
+# --- End Lockdown ---
+@app.route('/end_lockdown')
+@login_required(role='admin')
+def end_lockdown():
+    conn = get_db_connection()
+    cur = conn.cursor()
+ 
+    cur.execute('UPDATE system_lockdown SET active = FALSE WHERE active = TRUE')
+ 
+    # Log admin action
+    cur.execute('''
+        INSERT INTO admin_activity_logs (admin_username, action)
+        VALUES (%s, %s)
+    ''', (session['user'], 'End Lockdown'))
+ 
+    conn.commit()
+    cur.close()
+    conn.close()
+ 
+    return redirect('/admin_logs')
+# ✅ Flask Route: /admin_users
+from flask import render_template, request, redirect, session, make_response
+from functools import wraps
+import psycopg2, re
+ 
+# --- Database connection ---
+def get_db_connection():
+    return psycopg2.connect(
+        dbname='drbac_db', user='drbac_user', password='Admin123@', host='localhost', port='5432')
+ 
+# --- Login required ---
+def login_required(role=None):
+    def wrapper(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not session.get('user'):
+                session.clear()
+                return redirect('/')
+            if role and session.get('role') != role:
+                session.clear()
+                return redirect('/')
+            return f(*args, **kwargs)
+        return decorated_function
+    return wrapper
+ #--- Admin Users ---
+@app.route('/admin_users', methods=['GET', 'POST'])
+
+@login_required(role='admin')
+
+def admin_users():
+
+    message = None
+
+    error = None
+ 
+    conn = get_db_connection()
+
+    cur = conn.cursor()
+ 
+    try:
+
+        # --- Handle Create User ---
+
+        if request.method == 'POST' and 'create_user' in request.form:
+
+            username = request.form['username']
+
+            password = request.form['password']
+
+            role = request.form['role']
+
+            email = request.form['email']
+
+            phone = request.form['phone']
+ 
+            if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$', password):
+
+                error = '❌ Weak password. Must have letters, numbers, special characters, min 8 chars.'
+
+            else:
+
+                cur.execute("""
+
+                INSERT INTO users (username, password, role, email, phone_number, status)
+
+                VALUES (%s, %s, %s, %s, %s, 'active')
+
+                """, (username, password, role, email, phone))
+
+                cur.execute("""
+
+                INSERT INTO admin_logs (admin_username, action, target_username)
+
+                VALUES (%s, %s, %s)
+
+                """, (session['user'], 'Created user', username))
+
+                conn.commit()
+
+                message = f'✅ User {username} created successfully!'
+ 
+        # --- Handle Edit User ---
+
+        if request.method == 'POST' and 'edit_user' in request.form:
+
+            uid = request.form['user_id']
+
+            email = request.form['email']
+
+            phone = request.form['phone']
+
+            role = request.form['role']
+
+            password = request.form.get('password')
+ 
+            cur.execute('SELECT username FROM users WHERE id = %s', (uid,))
+
+            target_user = cur.fetchone()[0]
+ 
+            if password:
+
+                if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$', password):
+
+                    error = '❌ Weak password. Must have letters, numbers, special characters, min 8 chars.'
+
+                else:
+
+                    cur.execute('UPDATE users SET email=%s, phone_number=%s, role=%s, password=%s WHERE id=%s',
+
+                                (email, phone, role, password, uid))
+
+                    cur.execute("""
+
+                    INSERT INTO admin_logs (admin_username, action, target_username)
+
+                    VALUES (%s, %s, %s)
+
+                    """, (session['user'], 'Edited user + password', target_user))
+
+                    conn.commit()
+
+                    message = f'✅ User ID {uid} updated with new password.'
+
+            else:
+
+                cur.execute('UPDATE users SET email=%s, phone_number=%s, role=%s WHERE id=%s',
+
+                            (email, phone, role, uid))
+
+                cur.execute("""
+
+                INSERT INTO admin_logs (admin_username, action, target_username)
+
+                VALUES (%s, %s, %s)
+
+                """, (session['user'], 'Edited user', target_user))
+
+                conn.commit()
+
+                message = f'✅ User ID {uid} updated successfully.'
+ 
+        # --- Handle Reset Password ---
+
+        if request.method == 'POST' and 'reset_password' in request.form:
+
+            uid = request.form['user_id']
+
+            new_password = request.form['password']
+ 
+            if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$', new_password):
+
+                error = '❌ Weak password. Must have letters, numbers, special characters, min 8 chars.'
+
+            else:
+
+                cur.execute('UPDATE users SET password=%s WHERE id=%s', (new_password, uid))
+
+                cur.execute('SELECT username FROM users WHERE id = %s', (uid,))
+
+                uname = cur.fetchone()[0]
+
+                cur.execute("""
+
+                INSERT INTO admin_logs (admin_username, action, target_username)
+
+                VALUES (%s, %s, %s)
+
+                """, (session['user'], 'Reset password', uname))
+
+                conn.commit()
+
+                message = f'✅ Password reset successfully for user ID {uid}.'
+ 
+        # --- Handle Delete User ---
+
+        if request.method == 'POST' and 'delete_user' in request.form:
+
+            uid = request.form['user_id']
+
+            cur.execute('UPDATE users SET status=%s WHERE id=%s', ('deleted', uid))
+
+            cur.execute('SELECT username FROM users WHERE id = %s', (uid,))
+
+            uname = cur.fetchone()[0]
+
+            cur.execute("""
+
+            INSERT INTO admin_logs (admin_username, action, target_username)
+
+            VALUES (%s, %s, %s)
+
+            """, (session['user'], 'Soft-deleted user', uname))
+
+            conn.commit()
+
+            message = f'✅ User ID {uid} soft-deleted.'
+ 
+    except Exception as e:
+
+        error = f'❌ Error: {str(e)}'
+
+        conn.rollback()
+ 
+    # Fetch users
+
+    cur.execute('SELECT id, username, email, phone_number, role, status FROM users ORDER BY id')
+
+    users = cur.fetchall()
+ 
+    cur.close()
+
+    conn.close()
+ 
+    return make_response(render_template('admin_users.html', users=users, message=message, error=error))
+
+ 
+# --- Active Users ---
+ 
+@app.route('/active_users')
+@login_required(role='admin')
+def active_users():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('SELECT username, ip, device, login_time FROM active_sessions')
+    users = cur.fetchall()
+    cur.close()
+    conn.close()
+ 
+    return make_response(render_template('active_users.html', users=users))
+ 
+# --- Force Logout Specific User ---
+@app.route('/force_logout/<username>')
+@login_required(role='admin')
+def force_logout(username):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('DELETE FROM active_sessions WHERE username = %s', (username,))
+    conn.commit()
+    cur.close()
+    conn.close()
+ 
+    return redirect('/active_users')
+
+# --- Risk Panel ---
+@app.route('/risk_panel')
+@login_required(role='admin')
+def risk_panel():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('SELECT risk, COUNT(*) FROM access_logs GROUP BY risk')
+    data = cur.fetchall()
+    cur.close()
+    conn.close()
+ 
+    # Prepare risk data for Chart.js
+    risk_counts = {'low': 0, 'high': 0}
+    for row in data:
+        risk = row[0]
+        count = row[1]
+        risk_counts[risk] = count
+ 
+    return make_response(render_template('risk_panel.html', risk_counts=risk_counts))
+# --- Heatmap ---
+@app.route('/heatmap')
+
+@login_required()
+
+def heatmap():
+
+    session['allowed_page'] = 'heatmap'
+
+    conn = get_db_connection()
+
+    cur = conn.cursor()
+ 
+    page = request.args.get('page', 1, type=int)
+
+    per_page = 5
+
+    offset = (page - 1) * per_page
+ 
+    date_filter = request.args.get('date')
+
+    filters = []
+
+    query = 'SELECT username, city, country, risk, login_time FROM access_logs WHERE 1=1'
+ 
+    if date_filter:
+
+        query += ' AND DATE(login_time) = %s'
+
+        filters.append(date_filter)
+ 
+    query += ' ORDER BY login_time DESC LIMIT %s OFFSET %s'
+
+    filters.extend([per_page, offset])
+ 
+    cur.execute(query, tuple(filters))
+
+    logs = cur.fetchall()
+ 
+    cur.execute('SELECT COUNT(*) FROM access_logs')
+
+    total_logs = cur.fetchone()[0]
+
+    has_next = (page * per_page) < total_logs
+ 
+    conn.close()
+ 
+    logins = []
+
+    for log in logs:
+
+        try:
+
+            location = f"{log[1]},{log[2]}"
+
+            response_geo = requests.get(f'https://nominatim.openstreetmap.org/search?q={location}&format=json')
+
+            geo = response_geo.json()
+
+            lat = float(geo[0]['lat'])
+
+            lon = float(geo[0]['lon'])
+
+        except:
+
+            lat, lon = 33.8547, 35.8623
+ 
+        logins.append({
+
+            'username': log[0],
+
+            'city': log[1],
+
+            'country': log[2],
+
+            'risk': log[3],
+
+            'lat': lat,
+
+            'lon': lon
+
+        })
+ 
+    return make_response(render_template('heatmap.html', logins=logins, page=page, has_next=has_next))
+ 
+# --- Logout ---
+
+@app.route('/logout')
+
+@login_required()
+
+def logout():
+
+    username = session.get('user')
+
+    conn = get_db_connection()
+
+    cur = conn.cursor()
+
+    cur.execute('DELETE FROM active_sessions WHERE username = %s', (username,))
+
+    conn.commit()
+
+    cur.close()
+
+    conn.close()
+ 
+    session.clear()
+
+    return redirect('/')
+ 
+# --- Main ---
+
+if __name__ == '__main__':
+
+    app.run(debug=True)
+
+ 

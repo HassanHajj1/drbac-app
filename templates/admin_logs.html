@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Logs - DRBAC System</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        background-color: #0d1117;
+        font-family: 'Orbitron', sans-serif;
+        margin: 0;
+        padding: 0;
+        color: white;
+    }
+    .navbar {
+        background-color: #161b22;
+        padding: 15px;
+        display: flex;
+        justify-content: space-around;
+    }
+    .navbar a {
+        color: #0d6efd;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .navbar a:hover {
+        color: #58a6ff;
+    }
+    .container {
+        padding: 30px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background-color: #161b22;
+    }
+    th, td {
+        border: 1px solid #30363d;
+        padding: 12px;
+        text-align: center;
+    }
+    th {
+        background-color: #21262d;
+    }
+    .filter-form {
+        margin-top: 20px;
+        text-align: center;
+    }
+    input, select, button {
+        padding: 10px;
+        margin: 5px;
+        border-radius: 5px;
+        border: none;
+    }
+    button {
+        background-color: #0d6efd;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    .lockdown-buttons {
+        text-align: center;
+        margin: 20px 0;
+    }
+    .lockdown-buttons a {
+        padding: 10px 20px;
+        margin: 5px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        color: white;
+    }
+    .start-lockdown {
+        background-color: red;
+    }
+    .end-lockdown {
+        background-color: green;
+    }
+</style>
+</head>
+ 
+<body>
+ 
+    <div class="navbar">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/admin_logs">Admin Panel</a>
+        <a href="/blocked_users">Blocked Users</a>
+        <a href="/heatmap">Heatmap</a>
+        <a href="/active_users">Active Users</a> <!-- ✅ Add this line -->
+        <a href="/risk_panel">Risk Panel</a>
+        <a href="/admin_activity_logs">Activity</a>
+        <a href="/admin_users">Users Handling</a>
+        <a href="/logout">Logout</a></div>
+
+<div class="container">
+<h2>Admin Logs</h2>
+ 
+    <div class="lockdown-buttons">
+<a href="/start_lockdown" class="start-lockdown">🚨 Start Lockdown</a>
+<a href="/end_lockdown" class="end-lockdown">✅ End Lockdown</a>
+</div>
+ 
+    <form method="get" action="/admin_logs" class="filter-form">
+        Filter by Risk:
+<select name="risk">
+<option value="">All</option>
+<option value="low">Low</option>
+<option value="high">High</option>
+</select>
+        Date:
+<input type="date" name="date">
+<button type="submit">Apply Filters</button>
+</form>
+ 
+    <table>
+<tr>
+<th>Username</th>
+<th>Role</th>
+<th>IP</th>
+<th>Login Time</th>
+<th>Risk</th>
+<th>Country</th>
+<th>City</th>
+<th>Device</th>
+<th>Action</th>
+</tr>
+ 
+        {% for log in logs %}
+<tr>
+<td>{{ log[1] }}</td>
+<td>{{ log[2] }}</td>
+<td>{{ log[3] }}</td>
+<td>{{ log[4] }}</td>
+<td>{{ log[5] }}</td>
+<td>{{ log[6] }}</td>
+<td>{{ log[7] }}</td>
+<td>{{ log[8] }}</td>
+<td><a href="/block_user/{{ log[1] }}" style="color: red;">Block</a></td>
+</tr>
+        {% endfor %}
+</table>
+ 
+</div>
+ 
+</body>
+</html>

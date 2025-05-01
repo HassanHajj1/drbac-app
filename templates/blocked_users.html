@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Blocked Users - DRBAC System</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        background-color: #0d1117;
+        font-family: 'Orbitron', sans-serif;
+        margin: 0;
+        padding: 0;
+        color: white;
+    }
+    .navbar {
+        background-color: #161b22;
+        padding: 15px;
+        display: flex;
+        justify-content: center;
+    }
+    .navbar a {
+        color: #0d6efd;
+        margin: 0 10px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .navbar a:hover {
+        color: #58a6ff;
+    }
+    .container {
+        padding: 30px;
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background-color: #161b22;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    th, td {
+        border: 1px solid #30363d;
+        padding: 12px;
+        text-align: center;
+    }
+    th {
+        background-color: #21262d;
+        font-size: 16px;
+    }
+    td {
+        font-size: 14px;
+    }
+    .unblock-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        text-decoration: none;
+    }
+    .unblock-btn:hover {
+        background-color: #b02a37;
+    }
+</style>
+</head>
+<body>
+ 
+<div class="navbar">
+<a href="/dashboard">Dashboard</a>
+<a href="/admin_logs">Admin Panel</a>
+<a href="/blocked_users">Blocked Users</a>
+<a href="/heatmap">Heatmap</a>
+<a href="/active_users">Active Users</a>
+<a href="/risk_panel">Risk Panel</a>
+<a href="/admin_activity_logs">Admin Activities</a>
+<a href="/logout">Logout</a>
+</div>
+ 
+<div class="container">
+<h2>Blocked Users</h2>
+ 
+    {% if users %}
+<table>
+<tr>
+<th>Username</th>
+<th>Action</th>
+</tr>
+        {% for user in users %}
+<tr>
+<td>{{ user[0] }}</td>
+<td>
+<a class="unblock-btn" href="/unblock_user/{{ user[0] }}">Unblock</a>
+</td>
+</tr>
+        {% endfor %}
+</table>
+    {% else %}
+<p style="text-align: center; margin-top: 20px;">✅ No blocked users!</p>
+    {% endif %}
+</div>
+ 
+</body>
+</html>

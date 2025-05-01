@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Active Sessions - DRBAC System</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        background-color: #0d1117;
+        font-family: 'Orbitron', sans-serif;
+        color: white;
+        margin: 0;
+        padding: 0;
+    }
+    .navbar {
+        background-color: #161b22;
+        padding: 15px;
+        display: flex;
+        justify-content: space-around;
+    }
+    .navbar a {
+        color: #0d6efd;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .navbar a:hover {
+        color: #58a6ff;
+    }
+    .container {
+        padding: 30px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background-color: #161b22;
+    }
+    th, td {
+        border: 1px solid #30363d;
+        padding: 12px;
+        text-align: center;
+    }
+    th {
+        background-color: #21262d;
+    }
+    button {
+        background-color: #dc3545;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #c82333;
+    }
+</style>
+</head>
+<body>
+ 
+<div class="navbar">
+<a href="/dashboard">Dashboard</a>
+<a href="/admin_logs">Admin Panel</a>
+<a href="/blocked_users">Blocked Users</a>
+<a href="/heatmap">Heatmap</a>
+<a href="/active_users">Active Users</a>
+<a href="/logout">Logout</a>
+</div>
+ 
+<div class="container">
+<h2>Active Sessions</h2>
+ 
+<table>
+<tr>
+<th>Username</th>
+<th>IP Address</th>
+<th>Device</th>
+<th>Login Time</th>
+<th>Action</th>
+</tr>
+ 
+{% for user in users %}
+<tr>
+<td>{{ user[0] }}</td>
+<td>{{ user[1] }}</td>
+<td>{{ user[2] }}</td>
+<td>{{ user[3] }}</td>
+<td>
+<form action="/force_logout/{{ user[0] }}" method="get" style="margin:0;">
+<button type="submit">Force Logout</button>
+</form>
+</td>
+</tr>
+{% endfor %}
+</table>
+ 
+</div>
+</body>
+</html>

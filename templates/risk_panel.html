@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login Risk Analysis - DRBAC System</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<style>
+    body {
+        background-color: #0d1117;
+        font-family: 'Orbitron', sans-serif;
+        margin: 0;
+        padding: 0;
+        color: white;
+        text-align: center;
+    }
+ 
+    nav {
+        background-color: #003366;
+        padding: 10px;
+    }
+ 
+    nav a {
+        color: white;
+        margin: 0 15px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+ 
+    nav a:hover {
+        text-decoration: underline;
+    }
+ 
+    .container {
+        margin-top: 30px;
+    }
+ 
+    canvas {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 10px;
+        max-width: 600px;
+        width: 90%;
+        height: auto;
+        margin: 20px auto;
+    }
+ 
+    h2 {
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-size: 28px;
+        color: #58a6ff;
+    }
+</style>
+</head>
+<body>
+ 
+<nav>
+<a href="/dashboard">Dashboard</a>
+<a href="/admin_logs">Admin Panel</a>
+<a href="/blocked_users">Blocked Users</a>
+<a href="/heatmap">Heatmap</a>
+<a href="/active_users">Active Users</a>
+<a href="/risk_panel">Risk Panel</a>
+<a href="/logout" style="color: red;">Logout</a>
+</nav>
+ 
+<div class="container">
+<h2>Login Risk Analysis</h2>
+ 
+    <canvas id="riskChart"></canvas>
+ 
+    <script>
+        var ctx = document.getElementById('riskChart').getContext('2d');
+        var riskChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Low Risk', 'High Risk'],
+                datasets: [{
+                    label: 'Login Risks',
+                    data: [{{ risk_counts['low'] }}, {{ risk_counts['high'] }}],
+                    backgroundColor: ['#28a745', '#dc3545'],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                animation: {
+                    animateRotate: true,
+                    duration: 2000 // 2 seconds slow animation
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'white',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        formatter: (value, ctx) => {
+                            let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            let percentage = (value * 100 / sum).toFixed(0) + "%";
+                            return percentage;
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+ 
+        // 🔥 Auto refresh page every 30 seconds
+        setTimeout(() => {
+            window.location.reload();
+        }, 30000);
+</script>
+</div>
+ 
+</body>
+</html>

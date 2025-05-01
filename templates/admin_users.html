@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin User Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+    body {
+
+      background-color: #0d1117;
+
+      font-family: 'Orbitron', sans-serif;
+
+      color: white;
+
+      margin: 0;
+
+      padding: 0;
+
+    }
+
+    .navbar {
+
+      background-color: #161b22;
+
+      padding: 15px;
+
+      display: flex;
+
+      justify-content: center;
+
+    }
+
+    .navbar a {
+
+      color: #0d6efd;
+
+      margin: 0 10px;
+
+      text-decoration: none;
+
+      font-weight: bold;
+
+    }
+
+    .navbar a:hover {
+
+      color: #58a6ff;
+
+    }
+
+    .container {
+
+      padding: 30px;
+
+    }
+
+    h2 {
+
+      text-align: center;
+
+    }
+
+    form {
+
+      background-color: #161b22;
+
+      padding: 20px;
+
+      border-radius: 8px;
+
+      margin-bottom: 30px;
+
+    }
+
+    input, select {
+
+      padding: 10px;
+
+      margin: 5px;
+
+      width: calc(100% - 20px);
+
+      background-color: #0d1117;
+
+      color: white;
+
+      border: 1px solid #30363d;
+
+      border-radius: 5px;
+
+    }
+
+    button {
+
+      background-color: #0d6efd;
+
+      color: white;
+
+      font-weight: bold;
+
+      padding: 10px 20px;
+
+      margin-top: 10px;
+
+      border: none;
+
+      border-radius: 5px;
+
+      cursor: pointer;
+
+    }
+
+    button:hover {
+
+      background-color: #0056b3;
+
+    }
+
+    table {
+
+      width: 100%;
+
+      border-collapse: collapse;
+
+      background-color: #161b22;
+
+    }
+
+    th, td {
+
+      padding: 12px;
+
+      border: 1px solid #30363d;
+
+      text-align: center;
+
+    }
+
+    th {
+
+      background-color: #21262d;
+
+    }
+
+    .message {
+
+      background-color: #198754;
+
+      color: white;
+
+      padding: 10px;
+
+      border-radius: 5px;
+
+      margin-bottom: 20px;
+
+    }
+
+    .error {
+
+      background-color: #dc3545;
+
+      color: white;
+
+      padding: 10px;
+
+      border-radius: 5px;
+
+      margin-bottom: 20px;
+
+    }
+</style>
+</head>
+<body>
+<div class="navbar">
+<a href="/dashboard">Dashboard</a>
+<a href="/admin_logs">Admin Panel</a>
+<a href="/admin_users">Admin Users</a>
+<a href="/admin_activity_logs">Activity Logs</a>
+<a href="/logout">Logout</a>
+</div>
+ 
+<div class="container">
+<h2>Admin User Management</h2>
+ 
+  {% if message %}
+<div class="message">{{ message }}</div>
+
+  {% endif %}
+
+  {% if error %}
+<div class="error">{{ error }}</div>
+
+  {% endif %}
+ 
+  <!-- Create User Form -->
+<form method="POST">
+<h3>Create User</h3>
+<input type="text" name="username" placeholder="Username" required>
+<input type="password" name="password" placeholder="Password (Min 8 chars, letters, numbers, symbols)" required>
+<input type="email" name="email" placeholder="Email">
+<input type="text" name="phone" placeholder="Phone Number">
+<select name="role">
+<option value="user">User</option>
+<option value="admin">Admin</option>
+</select>
+<button name="create_user" type="submit">Create User</button>
+</form>
+ 
+  <!-- Edit/Delete User Table -->
+<h3>Existing Users</h3>
+<table>
+<tr>
+<th>ID</th>
+<th>Username</th>
+<th>Email</th>
+<th>Phone</th>
+<th>Role</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+
+    {% for user in users %}
+<tr>
+<form method="POST">
+<td>{{ user[0] }}<input type="hidden" name="user_id" value="{{ user[0] }}"></td>
+<td>{{ user[1] }}</td>
+<td><input type="email" name="email" value="{{ user[2] }}"></td>
+<td><input type="text" name="phone" value="{{ user[3] }}"></td>
+<td>
+<select name="role">
+<option value="user" {% if user[4] == 'user' %}selected{% endif %}>User</option>
+<option value="admin" {% if user[4] == 'admin' %}selected{% endif %}>Admin</option>
+</select>
+</td>
+<td>{{ user[5] }}</td>
+<td>
+<input type="password" name="password" placeholder="New Password">
+<button name="edit_user" type="submit">Edit</button>
+<button name="reset_password" type="submit">Reset Password</button>
+<button name="delete_user" type="submit">Delete</button>
+</td>
+</form>
+</tr>
+
+    {% endfor %}
+</table>
+</div>
+</body>
+</html>
+
+ 
