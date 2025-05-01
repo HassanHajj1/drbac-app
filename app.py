@@ -10,11 +10,18 @@ import requests
 from functools import wraps
 from email.message import EmailMessage
 import re
+import os
+import psycopg2
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
  
 # --- Database Connection ---
+def get_db_connection():
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    return conn
+
+
 def get_db_connection():
     conn = psycopg2.connect(
         dbname='drbac_db',
