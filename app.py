@@ -17,10 +17,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
  
 # --- Database Connection ---
-def get_db_connection():
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    return conn
-
+from db_connection import get_db_connection
 
  
 # --- No-Cache After Each Response ---
