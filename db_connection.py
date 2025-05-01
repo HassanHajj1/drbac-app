@@ -1,11 +1,5 @@
 import psycopg2
- 
+import os
 def get_db_connection():
-    conn = psycopg2.connect(
-        dbname='drbac_db',
-        user='drbac_user',    # or 'postgres' if you want
-        password='Admin123@',
-        host='localhost',
-        port='5432'
-    )
-    return conn
+   conn = psycopg2.connect(os.environ.get('DATABASE_URL'))
+   return conn
