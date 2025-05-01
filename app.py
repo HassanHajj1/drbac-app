@@ -360,10 +360,7 @@ from functools import wraps
 import psycopg2, re
  
 # --- Database connection ---
-def get_db_connection():
-    return psycopg2.connect(
-        dbname='drbac_db', user='drbac_user', password='Admin123@', host='localhost', port='5432')
- 
+
 # --- Login required ---
 def login_required(role=None):
     def wrapper(f):
