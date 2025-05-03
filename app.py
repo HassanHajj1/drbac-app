@@ -449,30 +449,28 @@ def export_my_logins():
 @app.route('/admin_suspicious_reports')
 @login_required(role='admin')
 def admin_suspicious_reports():
+   page = request.args.get('page', 1, type=int)
+   per_page = 5
+   offset = (page - 1) * per_page
    conn = get_db_connection()
    cur = conn.cursor()
-   # --- Filters ---
    query = '''
-       SELECT sr.id, sr.username, sr.reason, sr.report_time, al.ip, al.device, al.city, al.country, al.risk, al.login_time, u.locked
+       SELECT sr.id, sr.username, sr.reason, sr.report_time,
+              al.ip, al.device, al.city, al.country, al.risk, al.login_time, u.locked
        FROM suspicious_reports sr
        JOIN access_logs al ON sr.log_id = al.id
        JOIN users u ON sr.username = u.username
-       WHERE 1=1
+       ORDER BY sr.report_time DESC
+       LIMIT %s OFFSET %s
    '''
-   filters = []
-   if request.args.get('status') == 'locked':
-       query += ' AND u.locked = TRUE'
-   elif request.args.get('status') == 'unlocked':
-       query += ' AND u.locked = FALSE'
-   if request.args.get('user'):
-       query += ' AND sr.username = %s'
-       filters.append(request.args.get('user'))
-   query += ' ORDER BY sr.report_time DESC'
-   cur.execute(query, tuple(filters))
+   cur.execute(query, (per_page, offset))
    reports = cur.fetchall()
+   cur.execute('SELECT COUNT(*) FROM suspicious_reports')
+   total = cur.fetchone()[0]
+   has_next = (page * per_page) < total
    cur.close()
    conn.close()
-   return render_template('admin_suspicious_reports.html', reports=reports)
+   return render_template('admin_suspicious_reports.html', reports=reports, page=page, has_next=has_next)
 
 # --- Lock User Account ---
 @app.route('/lock_account/<username>')
