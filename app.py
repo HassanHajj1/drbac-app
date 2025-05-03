@@ -497,20 +497,7 @@ def unlock_account(username):
    cur.close()
    conn.close()
    return redirect('/admin_suspicious_reports')
-# --- Login required ---
-def login_required(role=None):
-    def wrapper(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if not session.get('user'):
-                session.clear()
-                return redirect('/')
-            if role and session.get('role') != role:
-                session.clear()
-                return redirect('/')
-            return f(*args, **kwargs)
-        return decorated_function
-    return wrapper
+
  #--- Admin Users ---
 @app.route('/admin_users', methods=['GET', 'POST'])
 
