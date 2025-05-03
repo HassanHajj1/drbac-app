@@ -359,7 +359,75 @@ from flask import render_template, request, redirect, session, make_response
 from functools import wraps
 import psycopg2, re
  
-# --- Database connection ---
+# --- Route: My Logins Page (View + Report Suspicious) ---
+@app.route('/my_logins', methods=['GET', 'POST'])
+@login_required()
+def my_logins():
+    username = session.get('user')
+    conn = get_db_connection()
+    cur = conn.cursor()
+    message = None
+ 
+    # Handle suspicious report
+    if request.method == 'POST' and 'log_id' in request.form:
+        log_id = request.form['log_id']
+        reason = request.form['reason']
+        cur.execute('SELECT 1 FROM suspicious_reports WHERE username = %s AND log_id = %s', (username, log_id))
+        if not cur.fetchone():
+            cur.execute('''
+                INSERT INTO suspicious_reports (username, log_id, reason, report_time)
+                VALUES (%s, %s, %s, NOW())
+            ''', (username, log_id, reason))
+            conn.commit()
+            message = '🚨 Suspicious activity reported successfully.'
+        else:
+            message = '⚠️ You already reported this login.'
+ 
+    # Fetch user's login history
+    cur.execute('''
+        SELECT id, login_time, ip, device, city, country, risk
+        FROM access_logs
+        WHERE username = %s
+        ORDER BY login_time DESC
+    ''', (username,))
+    logs = cur.fetchall()
+ 
+    cur.close()
+    conn.close()
+ 
+    return render_template('my_logins.html', logs=logs, message=message)
+@app.route('/export_my_logins')
+@login_required()
+def export_my_logins():
+    username = session.get('user')
+    conn = get_db_connection()
+    cur = conn.cursor()
+ 
+    cur.execute('''
+        SELECT ip, device, login_time, risk, country, city
+        FROM access_logs
+        WHERE username = %s
+        ORDER BY login_time DESC
+    ''', (username,))
+    rows = cur.fetchall()
+ 
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['IP', 'Device', 'Login Time', 'Risk', 'Country', 'City'])
+ 
+    for row in rows:
+        writer.writerow(row)
+ 
+    output.seek(0)
+    cur.close()
+    conn.close()
+ 
+    return send_file(
+        io.BytesIO(output.getvalue().encode()),
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name='my_login_history.csv'
+    )
 
 # --- Login required ---
 def login_required(role=None):
