@@ -2,88 +2,188 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>My Login Activity - DRBAC</title>
+<title>My Logins - DRBAC</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
 <style>
-   body {
-     font-family: 'Orbitron', sans-serif;
-     background-color: #0d1117;
-     color: white;
-     margin: 0;
-   }
-   .navbar {
-     background-color: #161b22;
-     padding: 1rem;
-     text-align: center;
-   }
-   .navbar a {
-     margin: 0 1rem;
-     color: #0d6efd;
-     text-decoration: none;
-   }
-   .container {
-     max-width: 1000px;
-     margin: auto;
-     padding: 2rem;
-   }
-   h2 {
-     text-align: center;
-     margin-bottom: 1rem;
-   }
-   table {
-     width: 100%;
-     border-collapse: collapse;
-     margin-bottom: 2rem;
-   }
-   th, td {
-     border: 1px solid #30363d;
-     padding: 10px;
-     text-align: center;
-   }
-   th {
-     background-color: #21262d;
-   }
-   .btn {
-     background-color: #0d6efd;
-     color: white;
-     padding: 10px 20px;
-     text-decoration: none;
-     border-radius: 6px;
-   }
-   .form-card {
-     background-color: #161b22;
-     padding: 1.5rem;
-     border-radius: 8px;
-   }
-   label, textarea, input {
-     display: block;
-     width: 100%;
-     margin-top: 1rem;
-   }
-   input, textarea {
-     padding: 10px;
-     background-color: #0d1117;
-     color: white;
-     border: 1px solid #30363d;
-     border-radius: 5px;
-   }
-   .submit-btn {
-     margin-top: 1rem;
-     background-color: #0d6efd;
-     color: white;
-     padding: 10px;
-     border: none;
-     border-radius: 5px;
-     cursor: pointer;
-   }
-   .submit-btn:hover {
-     background-color: #1f77ff;
-   }
-   .message {
-     text-align: center;
-     color: #00ff99;
-     margin-bottom: 1rem;
-   }
+
+    body {
+
+      margin: 0;
+
+      font-family: 'Orbitron', sans-serif;
+
+      background-color: #0d1117;
+
+      color: #ffffff;
+
+    }
+
+    .navbar {
+
+      background-color: #161b22;
+
+      padding: 1rem;
+
+      text-align: center;
+
+    }
+
+    .navbar a {
+
+      color: #58a6ff;
+
+      text-decoration: none;
+
+      margin: 0 1rem;
+
+    }
+
+    .navbar a:hover {
+
+      color: #ffffff;
+
+    }
+
+    .container {
+
+      max-width: 1100px;
+
+      margin: auto;
+
+      padding: 2rem;
+
+    }
+
+    h2 {
+
+      text-align: center;
+
+    }
+
+    .btn {
+
+      background-color: #0d6efd;
+
+      color: white;
+
+      border: none;
+
+      padding: 0.5rem 1rem;
+
+      border-radius: 5px;
+
+      cursor: pointer;
+
+      margin-bottom: 1rem;
+
+    }
+
+    .btn:hover {
+
+      background-color: #1f77ff;
+
+    }
+
+    table {
+
+      width: 100%;
+
+      border-collapse: collapse;
+
+      margin-top: 1rem;
+
+    }
+
+    th, td {
+
+      padding: 0.75rem;
+
+      text-align: center;
+
+      border: 1px solid #30363d;
+
+    }
+
+    th {
+
+      background-color: #21262d;
+
+    }
+
+    .form-card {
+
+      margin-top: 2rem;
+
+      background-color: #161b22;
+
+      padding: 1.5rem;
+
+      border-radius: 8px;
+
+    }
+
+    input, textarea {
+
+      width: 100%;
+
+      padding: 0.6rem;
+
+      margin-top: 0.5rem;
+
+      margin-bottom: 1rem;
+
+      background-color: #0d1117;
+
+      border: 1px solid #30363d;
+
+      border-radius: 6px;
+
+      color: white;
+
+    }
+
+    .pagination {
+
+      text-align: center;
+
+      margin-top: 2rem;
+
+    }
+
+    .pagination a {
+
+      color: #58a6ff;
+
+      margin: 0 0.5rem;
+
+      text-decoration: none;
+
+    }
+
+    .pagination a.active {
+
+      color: white;
+
+      font-weight: bold;
+
+    }
+
+    .success {
+
+      background-color: #163300;
+
+      color: #a3ff6a;
+
+      padding: 0.75rem;
+
+      border-radius: 5px;
+
+      margin-bottom: 1rem;
+
+      text-align: center;
+
+    }
 </style>
 </head>
 <body>
@@ -94,16 +194,15 @@
 </div>
 <div class="container">
 <h2>My Login History</h2>
-   {% if message %}
-<div class="message">{{ message }}</div>
-   {% endif %}
-<div style="text-align: right; margin-bottom: 10px;">
-<a href="/export_my_logins" class="btn">📤 Export CSV</a>
-</div>
+
+    {% if message %}
+<div class="success">{{ message }}</div>
+
+    {% endif %}
+<a class="btn" href="/export_my_logins">📤 Export CSV</a>
 <table>
 <tr>
-<th>ID</th>
-<th>Date/Time</th>
+<th>Time</th>
 <th>IP</th>
 <th>Device</th>
 <th>City</th>
@@ -111,9 +210,9 @@
 <th>Risk</th>
 <th>Report</th>
 </tr>
-     {% for log in logs %}
+
+      {% for log in logs %}
 <tr>
-<td>{{ log[0] }}</td>
 <td>{{ log[1] }}</td>
 <td>{{ log[2] }}</td>
 <td>{{ log[3] }}</td>
@@ -121,15 +220,30 @@
 <td>{{ log[5] }}</td>
 <td>{{ log[6] }}</td>
 <td>
-<form action="/report_suspicious" method="POST">
+<form method="POST" action="/my_logins">
 <input type="hidden" name="log_id" value="{{ log[0] }}">
-<input type="text" name="reason" placeholder="Why suspicious?" required>
-<button class="submit-btn" type="submit">🚨 Report</button>
+<textarea name="reason" placeholder="Why is this suspicious?" required></textarea>
+<button type="submit" class="btn">Report</button>
 </form>
 </td>
 </tr>
-     {% endfor %}
+
+      {% endfor %}
 </table>
+<div class="pagination">
+
+      {% if page > 1 %}
+<a href="/my_logins?page={{ page - 1 }}">« Prev</a>
+
+      {% endif %}
+<a class="active">Page {{ page }}</a>
+
+      {% if has_next %}
+<a href="/my_logins?page={{ page + 1 }}">Next »</a>
+
+      {% endif %}
+</div>
 </div>
 </body>
 </html>
+ 
