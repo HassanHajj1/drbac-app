@@ -13,6 +13,7 @@ import re
 import os
 import psycopg2
 
+
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
  
@@ -355,11 +356,7 @@ def end_lockdown():
  
     return redirect('/admin_logs')
 # ✅ Flask Route: /admin_users
-from flask import render_template, request, redirect, session, make_response
-from functools import wraps
-import psycopg2, re
- 
-# --- Route: My Logins Page (View + Report Suspicious) ---
+
 @app.route('/my_logins', methods=['GET', 'POST'])
 @login_required()
 def my_logins():
@@ -383,52 +380,30 @@ def my_logins():
         else:
             message = '⚠️ You already reported this login.'
  
-    # Fetch user's login history
+    # Pagination setup
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+    offset = (page - 1) * per_page
+ 
+    # Fetch login logs
     cur.execute('''
         SELECT id, login_time, ip, device, city, country, risk
         FROM access_logs
         WHERE username = %s
         ORDER BY login_time DESC
-    ''', (username,))
+        LIMIT %s OFFSET %s
+    ''', (username, per_page, offset))
     logs = cur.fetchall()
  
+    # Check for next page
+    cur.execute('SELECT COUNT(*) FROM access_logs WHERE username = %s', (username,))
+    total_logs = cur.fetchone()[0]
+    has_next = (page * per_page) < total_logs
+ 
     cur.close()
     conn.close()
  
-    return render_template('my_logins.html', logs=logs, message=message)
-@app.route('/export_my_logins')
-@login_required()
-def export_my_logins():
-    username = session.get('user')
-    conn = get_db_connection()
-    cur = conn.cursor()
- 
-    cur.execute('''
-        SELECT ip, device, login_time, risk, country, city
-        FROM access_logs
-        WHERE username = %s
-        ORDER BY login_time DESC
-    ''', (username,))
-    rows = cur.fetchall()
- 
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(['IP', 'Device', 'Login Time', 'Risk', 'Country', 'City'])
- 
-    for row in rows:
-        writer.writerow(row)
- 
-    output.seek(0)
-    cur.close()
-    conn.close()
- 
-    return send_file(
-        io.BytesIO(output.getvalue().encode()),
-        mimetype='text/csv',
-        as_attachment=True,
-        download_name='my_login_history.csv'
-    )
-
+    return render_template('my_logins.html', logs=logs, message=message, page=page, has_next=has_next)
 # --- Login required ---
 def login_required(role=None):
     def wrapper(f):
