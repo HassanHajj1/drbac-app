@@ -404,6 +404,36 @@ def my_logins():
     conn.close()
  
     return render_template('my_logins.html', logs=logs, message=message, page=page, has_next=has_next)
+
+@app.route('/export_my_logins')
+@login_required()
+def export_my_logins():
+   username = session.get('user')
+   conn = get_db_connection()
+   cur = conn.cursor()
+   cur.execute('''
+       SELECT ip, device, login_time, risk, country, city
+       FROM access_logs
+       WHERE username = %s
+       ORDER BY login_time DESC
+   ''', (username,))
+   rows = cur.fetchall()
+   import io, csv
+   output = io.StringIO()
+   writer = csv.writer(output)
+   writer.writerow(['IP', 'Device', 'Login Time', 'Risk', 'Country', 'City'])
+   for row in rows:
+       writer.writerow(row)
+   output.seek(0)
+   cur.close()
+   conn.close()
+   from flask import send_file
+   return send_file(
+       io.BytesIO(output.getvalue().encode()),
+       mimetype='text/csv',
+       as_attachment=True,
+       download_name='my_login_history.csv'
+   )
 # --- Login required ---
 def login_required(role=None):
     def wrapper(f):
