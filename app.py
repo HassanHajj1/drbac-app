@@ -237,26 +237,36 @@ def dashboard():
 @app.route('/admin_logs')
 @login_required(role='admin')
 def admin_logs():
-    session['allowed_page'] = 'admin_logs'
-    conn = get_db_connection()
-    cur = conn.cursor()
-    query = 'SELECT * FROM access_logs WHERE 1=1'
-    filters = []
- 
-    if request.args.get('risk'):
-        query += ' AND risk = %s'
-        filters.append(request.args.get('risk'))
- 
-    if request.args.get('date'):
-        query += ' AND DATE(login_time) = %s'
-        filters.append(request.args.get('date'))
- 
-    query += ' ORDER BY login_time DESC'
-    cur.execute(query, tuple(filters))
-    logs = cur.fetchall()
-    conn.close()
- 
-    return make_response(render_template('admin_logs.html', logs=logs))
+   session['allowed_page'] = 'admin_logs'
+   conn = get_db_connection()
+   cur = conn.cursor()
+   query = '''
+       SELECT * FROM access_logs WHERE 1=1
+   '''
+   filters = []
+   # --- Filter by Risk Level ---
+   if request.args.get('risk'):
+       query += ' AND risk = %s'
+       filters.append(request.args.get('risk'))
+   # --- Filter by Date ---
+   if request.args.get('date'):
+       query += ' AND DATE(login_time) = %s'
+       filters.append(request.args.get('date'))
+   # --- Pagination Setup ---
+   page = request.args.get('page', 1, type=int)
+   per_page = 10
+   offset = (page - 1) * per_page
+   query += ' ORDER BY login_time DESC LIMIT %s OFFSET %s'
+   filters += [per_page, offset]
+   # --- Execute ---
+   cur.execute(query, tuple(filters))
+   logs = cur.fetchall()
+   # --- Check if Next Page Exists ---
+   cur.execute('SELECT COUNT(*) FROM access_logs')
+   total_logs = cur.fetchone()[0]
+   has_next = (page * per_page) < total_logs
+   conn.close()
+   return render_template('admin_logs.html', logs=logs, page=page, has_next=has_next)
 
 @app.route('/admin_activity_logs')
 @login_required(role='admin')
