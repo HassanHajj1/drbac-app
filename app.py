@@ -434,6 +434,61 @@ def export_my_logins():
        as_attachment=True,
        download_name='my_login_history.csv'
    )
+
+# --- Admin View: Suspicious Reports Panel ---
+@app.route('/admin_suspicious_reports')
+@login_required(role='admin')
+def admin_suspicious_reports():
+   conn = get_db_connection()
+   cur = conn.cursor()
+   # --- Filters ---
+   query = '''
+       SELECT sr.id, sr.username, sr.reason, sr.report_time, al.ip, al.device, al.city, al.country, al.risk, al.login_time, u.locked
+       FROM suspicious_reports sr
+       JOIN access_logs al ON sr.log_id = al.id
+       JOIN users u ON sr.username = u.username
+       WHERE 1=1
+   '''
+   filters = []
+   if request.args.get('status') == 'locked':
+       query += ' AND u.locked = TRUE'
+   elif request.args.get('status') == 'unlocked':
+       query += ' AND u.locked = FALSE'
+   if request.args.get('user'):
+       query += ' AND sr.username = %s'
+       filters.append(request.args.get('user'))
+   query += ' ORDER BY sr.report_time DESC'
+   cur.execute(query, tuple(filters))
+   reports = cur.fetchall()
+   cur.close()
+   conn.close()
+   return render_template('admin_suspicious_reports.html', reports=reports)
+
+# --- Lock User Account ---
+@app.route('/lock_account/<username>')
+@login_required(role='admin')
+def lock_account(username):
+   conn = get_db_connection()
+   cur = conn.cursor()
+   cur.execute('UPDATE users SET locked = TRUE WHERE username = %s', (username,))
+   cur.execute('''INSERT INTO admin_logs (admin_username, action, target_username) VALUES (%s, %s, %s)''', (session['user'], 'Locked Account', username))
+   conn.commit()
+   cur.close()
+   conn.close()
+   return redirect('/admin_suspicious_reports')
+
+# --- Unlock User Account ---
+@app.route('/unlock_account/<username>')
+@login_required(role='admin')
+def unlock_account(username):
+   conn = get_db_connection()
+   cur = conn.cursor()
+   cur.execute('UPDATE users SET locked = FALSE WHERE username = %s', (username,))
+   cur.execute('''INSERT INTO admin_logs (admin_username, action, target_username) VALUES (%s, %s, %s)''', (session['user'], 'Unlocked Account', username))
+   conn.commit()
+   cur.close()
+   conn.close()
+   return redirect('/admin_suspicious_reports')
 # --- Login required ---
 def login_required(role=None):
     def wrapper(f):
