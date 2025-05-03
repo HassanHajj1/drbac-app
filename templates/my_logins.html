@@ -199,7 +199,7 @@
 <div class="success">{{ message }}</div>
 
     {% endif %}
-<a class="btn" href="/export_my_logins">📤 Export CSV</a>
+<a href="{{ url_for('export_my_logins') }}" class="btn">📤 Export CSV</a>
 <table>
 <tr>
 <th>Time</th>
