@@ -93,7 +93,6 @@ def login():
    username = request.form['username']
    password = request.form['password']
    ip_address = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
-  
    # Device detection
    ua = request.user_agent.string.lower()
    if 'iphone' in ua:
@@ -177,38 +176,44 @@ def login():
        ON CONFLICT (username) DO UPDATE SET ip=EXCLUDED.ip, login_time=EXCLUDED.login_time, device=EXCLUDED.device
    ''', (username, ip_address, now, device))
    conn.commit()
-   # ---- ADVANCED RISK EVALUATION ----
+   # Advanced Risk Evaluation
    role = user[3]
    risk = 'low'
+   risk_reasons = []
    if role == 'admin':
-       admin_risk_factors = []
        if weekday >= 5:
-           admin_risk_factors.append("Weekend login")
-       if hour < 6:
-           admin_risk_factors.append("Login between 12 AM and 6 AM")
-       if device in ['iPhone', 'iPad', 'Android Device']:
-           admin_risk_factors.append("Mobile device used")
-       if country.lower() != 'lb':
-           admin_risk_factors.append("Login from outside Lebanon")
-       if admin_risk_factors:
            risk = 'high'
+           risk_reasons.append("Weekend login")
+       if hour < 6:
+           risk = 'high'
+           risk_reasons.append("Login between 12 AM and 6 AM")
+       if device in ['iPhone', 'iPad', 'Android Device']:
+           risk = 'high'
+           risk_reasons.append("Mobile device used")
+       if country.lower() != 'lb':
+           risk = 'high'
+           risk_reasons.append("Login from outside Lebanon")
    else:
-       # Regular user risk evaluation
        if hour < 8 or hour >= 18:
            risk = 'high'
+           risk_reasons.append("Login outside working hours")
        if weekday >= 5:
            risk = 'high'
+           risk_reasons.append("Weekend login")
        if device in ['iPhone', 'iPad', 'Android Device', 'Unknown']:
            risk = 'high'
+           risk_reasons.append("Mobile device used")
        if country.lower() != 'lb':
            risk = 'high'
-   # Location pattern check
+           risk_reasons.append("Login from outside Lebanon")
+   # Location mismatch detection (for all roles)
    cur.execute('SELECT city, country FROM access_logs WHERE username = %s ORDER BY login_time DESC LIMIT 1', (username,))
    last_location = cur.fetchone()
    if last_location:
        last_city, last_country = last_location
        if last_city != city or last_country != country:
            risk = 'high'
+           risk_reasons.append("Location mismatch with previous login")
    # Insert access log
    cur.execute('''
        INSERT INTO access_logs (username, role, ip, login_time, risk, country, city, device)
@@ -217,17 +222,20 @@ def login():
    conn.commit()
    cur.close()
    conn.close()
-   # Email alert if risk is high
+   # Send alert if risk is high
    if risk == 'high':
        send_alert_email(username, ip_address, country, city, device)
+   # Store session info
    session['user'] = username
    session['role'] = role
    session['ip'] = ip_address
    session['device'] = device
    session['risk'] = risk
+   session['risk_reason'] = ', '.join(risk_reasons) if risk_reasons else 'Normal login conditions'
    session['time_context'] = 'day' if 8 <= hour < 18 else 'night'
    session['allowed_page'] = 'dashboard'
    return redirect('/dashboard')
+# --- Dashboard ---
 # --- Dashboard ---
 @app.route('/dashboard')
 @login_required()
@@ -241,9 +249,8 @@ def dashboard():
         device=session['device'],
         risk=session['risk'],
         time_context=session['time_context'],
-        risk_reason=session.get('risk_reason', [])
-    ))
- 
+        risk_reason=session.get('risk_reason', 'No unusual conditions detected.')
+                ))
 # --- Admin Logs ---
 @app.route('/admin_logs')
 @login_required(role='admin')
