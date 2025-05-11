@@ -995,7 +995,25 @@ def heatmap():
         })
  
     return make_response(render_template('heatmap.html', logins=logins, page=page, has_next=has_next))
- 
+# --- user work ---
+
+@app.route('/user_work')
+@login_required()
+def user_work():
+   if session.get('risk') == 'high':
+       return render_template('user_blocked.html', reason=session.get('risk_reason'))
+   return render_template('user_work.html', user=session['user']) 
+# --- submit report ---
+
+@app.route('/submit_report', methods=['POST'])
+@login_required()
+def submit_report():
+   if session.get('risk') == 'high':
+       return 'Access denied: High risk.'
+   report = request.form['report']
+   # Optional: Save the report to the database
+   print(f"Report from {session['user']}: {report}")  # or log it
+   return '✅ Report submitted successfully.'
 # --- Logout ---
 
 @app.route('/logout')

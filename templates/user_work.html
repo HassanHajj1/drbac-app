@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>User Work</title>
+</head>
+<body style="background-color:#0d1117; color:white; font-family:Orbitron, sans-serif; text-align:center;">
+<h2>Welcome, {{ user }}!</h2>
+<p>You are allowed to work.</p>
+<form method="POST" action="/submit_report">
+<textarea name="report" placeholder="Write your report here..." rows="5" cols="40" required></textarea><br><br>
+<button type="submit">Submit Report</button>
+</form>
+</body>
+</html>
