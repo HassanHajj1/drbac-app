@@ -249,8 +249,8 @@ def dashboard():
         device=session['device'],
         risk=session['risk'],
         time_context=session['time_context'],
-        risk_reason=session.get('risk_reason', 'No unusual conditions detected.')
-                ))
+        risk_reason=session.get('risk_reason', ['No unusual conditions detected.'])
+                    ))
 # --- Admin Logs ---
 @app.route('/admin_logs')
 @login_required(role='admin')
