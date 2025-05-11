@@ -5,63 +5,127 @@
 <title>Dashboard - DRBAC System</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 <style>
+
     body {
-        background-color: #0d1117;
-        font-family: 'Orbitron', sans-serif;
-        margin: 0;
-        padding: 0;
-        color: white;
+
+      background-color: #0d1117;
+
+      font-family: 'Orbitron', sans-serif;
+
+      margin: 0;
+
+      padding: 0;
+
+      color: white;
+
     }
+
     .navbar {
-        background-color: #161b22;
-        padding: 15px;
-        display: flex;
-        justify-content: space-around;
+
+      background-color: #161b22;
+
+      padding: 15px;
+
+      display: flex;
+
+      justify-content: space-around;
+
     }
+
     .navbar a {
-        color: #0d6efd;
-        text-decoration: none;
-        font-weight: bold;
+
+      color: #0d6efd;
+
+      text-decoration: none;
+
+      font-weight: bold;
+
     }
+
     .navbar a:hover {
-        color: #58a6ff;
+
+      color: #58a6ff;
+
     }
+
     .container {
-        padding: 40px;
-        text-align: center;
+
+      padding: 40px;
+
+      text-align: center;
+
     }
+
     .info-box {
-        background: #161b22;
-        padding: 20px;
-        border-radius: 10px;
-        display: inline-block;
-        margin-top: 20px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+
+      background: #161b22;
+
+      padding: 20px;
+
+      border-radius: 10px;
+
+      display: inline-block;
+
+      margin-top: 20px;
+
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+
     }
+
     h2 {
-        margin-bottom: 20px;
+
+      margin-bottom: 20px;
+
+    }
+
+    ul {
+
+      list-style-type: square;
+
+      text-align: left;
+
+      padding-left: 40px;
+
     }
 </style>
 </head>
 <body>
- 
 <div class="navbar">
-    {% if role == 'admin' %}
+
+  {% if role == 'admin' %}
 <a href="/admin_logs">Admin Panel</a>
-    {% endif %}
+
+  {% endif %}
 <a href="/heatmap">Heatmap</a>
 <a href="/logout">Logout</a>
 </div>
- 
 <div class="container">
 <h2>Welcome, {{ user }} ({{ role }})</h2>
 <div class="info-box">
 <p><strong>IP Address:</strong> {{ ip }}</p>
 <p><strong>Device:</strong> {{ device }}</p>
-<p><strong>Risk Level:</strong> {{ risk }}</p>
+<p>
+<strong>Risk Level:</strong>
+<span style="color: {{ 'red' if risk == 'high' else 'lightgreen' }};">
+
+        {{ risk|capitalize }}
+</span>
+</p>
 <p><strong>Time Context:</strong> {{ time_context }}</p>
+
+    {% if risk_reason %}
+<p><strong>Reason(s):</strong></p>
+<ul>
+
+        {% for reason in risk_reason %}
+<li>{{ reason }}</li>
+
+        {% endfor %}
+</ul>
+
+    {% endif %}
 </div>
 </div>
- 
 </body>
 </html>
+ 
