@@ -92,8 +92,8 @@ def home():
 def login():
    username = request.form['username']
    password = request.form['password']
-   ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
- 
+   ip_address = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
+  
    # Device detection
    ua = request.user_agent.string.lower()
    if 'iphone' in ua:
