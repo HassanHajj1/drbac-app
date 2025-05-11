@@ -412,6 +412,7 @@ def dashboard():
 @app.route('/admin_logs')
 @login_required(role='admin')
 def admin_logs():
+   
    session['allowed_page'] = 'admin_logs'
    conn = get_db_connection()
    cur = conn.cursor()
@@ -441,8 +442,20 @@ def admin_logs():
    total_logs = cur.fetchone()[0]
    has_next = (page * per_page) < total_logs
    conn.close()
-   return render_template('admin_logs.html', logs=logs, page=page, has_next=has_next)
+   return render_template(
 
+        'admin_logs.html',
+
+        logs=logs,
+
+        page=page,
+
+        has_next=has_next,
+
+        role=session['role']  # <-- make sure this is included
+
+    )
+ 
 @app.route('/admin_activity_logs')
 @login_required(role='admin')
 def admin_activity_logs():
@@ -452,7 +465,7 @@ def admin_activity_logs():
     logs = cur.fetchall()
     cur.close()
     conn.close()
-    return render_template('admin_activity_logs.html', logs=logs)
+    return render_template('admin_activity_logs.html', logs=logs,  role=session['role'])
 # --- Block User ---
 @app.route('/block_user/<username>')
 @login_required(role='admin')
@@ -506,7 +519,7 @@ def blocked_users():
     users = cur.fetchall()
     conn.close()
  
-    return make_response(render_template('blocked_users.html', users=users))
+    return make_response(render_template('blocked_users.html', users=users,  role=session['role']))
 @app.route('/start_lockdown')
 @login_required(role='admin')
 def start_lockdown():
@@ -588,7 +601,7 @@ def my_logins():
     cur.close()
     conn.close()
  
-    return render_template('my_logins.html', logs=logs, message=message, page=page, has_next=has_next)
+    return render_template('my_logins.html', logs=logs, message=message, page=page, has_next=has_next,  role=session['role'])
 
 @app.route('/export_my_logins')
 @login_required()
@@ -645,7 +658,7 @@ def admin_suspicious_reports():
    has_next = (page * per_page) < total
    cur.close()
    conn.close()
-   return render_template('admin_suspicious_reports.html', reports=reports, page=page, has_next=has_next)
+   return render_template('admin_suspicious_reports.html', reports=reports, page=page, has_next=has_next,  role=session['role'])
 
 # --- Lock User Account ---
 @app.route('/lock_account/<username>')
@@ -862,7 +875,7 @@ def admin_users():
 
     conn.close()
  
-    return make_response(render_template('admin_users.html', users=users, message=message, error=error))
+    return make_response(render_template('admin_users.html', users=users, message=message, error=error,  role=session['role']))
 
  
 # --- Active Users ---
@@ -877,7 +890,7 @@ def active_users():
     cur.close()
     conn.close()
  
-    return make_response(render_template('active_users.html', users=users))
+    return make_response(render_template('active_users.html', users=users,  role=session['role']))
  
 # --- Force Logout Specific User ---
 @app.route('/force_logout/<username>')
@@ -910,7 +923,7 @@ def risk_panel():
         count = row[1]
         risk_counts[risk] = count
  
-    return make_response(render_template('risk_panel.html', risk_counts=risk_counts))
+    return make_response(render_template('risk_panel.html', risk_counts=risk_counts, role=session['role'] ))
 # --- Heatmap ---
 @app.route('/heatmap')
 
@@ -994,15 +1007,20 @@ def heatmap():
 
         })
  
-    return make_response(render_template('heatmap.html', logins=logins, page=page, has_next=has_next))
+    return make_response(render_template('heatmap.html', logins=logins, page=page, has_next=has_next,role=session['role']))
 # --- user work ---
 
 @app.route('/user_work')
 @login_required()
 def user_work():
-   if session.get('risk') == 'high':
-       return render_template('user_blocked.html', reason=session.get('risk_reason'))
-   return render_template('user_work.html', user=session['user']) 
+    if session.get('risk') == 'high':
+        return render_template('user_blocked.html',
+                               reason=session.get('risk_reason'),
+                               role=session['role'],
+                               user=session['user'])
+    return render_template('user_work.html',
+                           user=session['user'],
+                           role=session['role'])
 # --- submit report ---
 
 @app.route('/submit_report', methods=['POST'])
