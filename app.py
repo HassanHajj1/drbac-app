@@ -92,8 +92,8 @@ def home():
 def login():
    username = request.form['username']
    password = request.form['password']
-   hostname = socket.gethostname()
-   ip_address = socket.gethostbyname(hostname)
+   ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+ 
    # Device detection
    ua = request.user_agent.string.lower()
    if 'iphone' in ua:
