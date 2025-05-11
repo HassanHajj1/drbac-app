@@ -1,12 +1,18 @@
 <nav style="background-color: #003366; padding: 10px; text-align: center;">
     <a href="/dashboard" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">Dashboard</a>
+       {% if role == 'admin' %}
     <a href="/admin_logs" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">Admin Panel</a>
     <a href="/blocked_users" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">Blocked Users</a>
     <a href="/heatmap" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">Heatmap</a>
     <a href="/active_users" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">Active Users</a>
     <a href="/risk_panel" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">Risk Panel</a>
-    <a href="/admin_activity_logs" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">activity</a>
+    <a href="/admin_activity_logs" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">Activity Logs</a>
     <a href="/admin_users" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">Users Handling</a>
+       {% else %}
+    <a href="/my_logins" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">My Logins</a>
+    <a href="/risk_panel" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">Risk Panel</a>
+    <a href="/user_work" style="color: white; margin: 0 15px; text-decoration: none; font-weight: bold;">My Work</a>
+       {% endif %}
     <a href="/logout" style="color: red; margin: 0 15px; text-decoration: none; font-weight: bold;">Logout</a>
     </nav>
     <hr>

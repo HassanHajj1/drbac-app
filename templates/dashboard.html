@@ -90,15 +90,7 @@
 </style>
 </head>
 <body>
-<div class="navbar">
-
-  {% if role == 'admin' %}
-<a href="/admin_logs">Admin Panel</a>
-
-  {% endif %}
-<a href="/heatmap">Heatmap</a>
-<a href="/logout">Logout</a>
-</div>
+{% include 'navbar.html' %}
 <div class="container">
 <h2>Welcome, {{ user }} ({{ role }})</h2>
 <div class="info-box">
