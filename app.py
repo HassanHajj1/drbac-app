@@ -134,6 +134,13 @@ def login():
        cur.close()
        conn.close()
        return '❌ Your account is suspended or deleted.'
+   # ✅ Blocked User Check
+   cur.execute('SELECT 1 FROM blocked_users WHERE username = %s', (username,))
+   is_blocked = cur.fetchone()
+   if is_blocked:
+       cur.close()
+       conn.close()
+       return '❌ Your account is blocked by the admin.'
    # Multi-device login check
    cur.execute('SELECT device FROM active_sessions WHERE username = %s', (username,))
    existing_session = cur.fetchone()
