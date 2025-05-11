@@ -12,6 +12,7 @@ from email.message import EmailMessage
 import re
 import os
 import psycopg2
+from flask import jsonify
 
 
 app = Flask(__name__)
@@ -88,161 +89,310 @@ def home():
         return redirect('/dashboard')
     return make_response(render_template('login.html'))
 
+from flask import jsonify
+
 @app.route('/login', methods=['POST'])
+
 def login():
-   username = request.form['username']
-   password = request.form['password']
-   ip_address = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
-   # Device detection
-   ua = request.user_agent.string.lower()
-   if 'iphone' in ua:
-       device = 'iPhone'
-   elif 'ipad' in ua:
-       device = 'iPad'
-   elif 'android' in ua:
-       device = 'Android Device'
-   elif 'windows' in ua:
-       device = 'Windows PC'
-   elif 'macintosh' in ua or 'mac os' in ua:
-       device = 'Mac'
-   elif 'linux' in ua:
-       device = 'Linux Device'
-   else:
-       device = 'Unknown'
-   conn = get_db_connection()
-   cur = conn.cursor()
-   # Lockdown check
-   cur.execute('SELECT active, end_time FROM system_lockdown ORDER BY id DESC LIMIT 1')
-   lockdown = cur.fetchone()
-   if lockdown:
-       active, end_time = lockdown
-       if active and end_time > datetime.datetime.now():
-           cur.execute('SELECT role FROM users WHERE username = %s', (username,))
-           result = cur.fetchone()
-           if result is None or result[0] != 'admin':
-               cur.close()
-               conn.close()
-               return '🚫 System under emergency lockdown.'
-   # Credential check
-   cur.execute('SELECT * FROM users WHERE username = %s AND password = %s', (username, password))
-   user = cur.fetchone()
-   if not user:
-       cur.close()
-       conn.close()
-       return '❌ Invalid credentials'
-   if user[8] != 'active':
-       cur.close()
-       conn.close()
-       return '❌ Your account is suspended or deleted.'
-   # ✅ Blocked User Check
-   cur.execute('SELECT 1 FROM blocked_users WHERE username = %s', (username,))
-   is_blocked = cur.fetchone()
-   if is_blocked:
-       cur.close()
-       conn.close()
-       return '❌ Your account is blocked by the admin.'
-   # Multi-device login check
-   cur.execute('SELECT device FROM active_sessions WHERE username = %s', (username,))
-   existing_session = cur.fetchone()
-   if existing_session and existing_session[0] != device:
-       cur.close()
-       conn.close()
-       return '❌ Multi-device login detected. Blocked.'
-   # IP info
-   access_token = '56dd46be625f08'
-   handler = ipinfo.getHandler(access_token)
-   try:
-       details = handler.getDetails(ip_address)
-       info = details.all
-       country = info.get('country', 'Unknown')
-       city = info.get('city', 'Unknown')
-   except:
-       country = 'Unknown'
-       city = 'Unknown'
-   now = datetime.datetime.now()
-   weekday = now.weekday()  # Monday=0, Sunday=6
-   hour = now.hour
-   # Travel detection
-   cur.execute('SELECT country, login_time FROM travel_logs WHERE username = %s ORDER BY login_time DESC LIMIT 1', (username,))
-   last_travel = cur.fetchone()
-   if last_travel:
-       last_country, last_login_time = last_travel
-       if last_country != country:
-           time_diff_hours = (now - last_login_time).total_seconds() / 3600
-           if time_diff_hours <= 6:
-               cur.close()
-               conn.close()
-               return '❌ Travel detected in short time. Contact Admin.'
-   # Insert travel log
-   cur.execute('INSERT INTO travel_logs (username, country, login_time) VALUES (%s, %s, %s)', (username, country, now))
-   conn.commit()
-   # Update session table
-   cur.execute('''
-       INSERT INTO active_sessions (username, ip, login_time, device)
-       VALUES (%s, %s, %s, %s)
-       ON CONFLICT (username) DO UPDATE SET ip=EXCLUDED.ip, login_time=EXCLUDED.login_time, device=EXCLUDED.device
-   ''', (username, ip_address, now, device))
-   conn.commit()
-   # Advanced Risk Evaluation
-   role = user[3]
-   risk = 'low'
-   risk_reasons = []
-   if role == 'admin':
-       if weekday >= 5:
-           risk = 'high'
-           risk_reasons.append("Weekend login")
-       if hour < 6:
-           risk = 'high'
-           risk_reasons.append("Login between 12 AM and 6 AM")
-       if device in ['iPhone', 'iPad', 'Android Device']:
-           risk = 'high'
-           risk_reasons.append("Mobile device used")
-       if country.lower() != 'lb':
-           risk = 'high'
-           risk_reasons.append("Login from outside Lebanon")
-   else:
-       if hour < 8 or hour >= 18:
-           risk = 'high'
-           risk_reasons.append("Login outside working hours")
-       if weekday >= 5:
-           risk = 'high'
-           risk_reasons.append("Weekend login")
-       if device in ['iPhone', 'iPad', 'Android Device', 'Unknown']:
-           risk = 'high'
-           risk_reasons.append("Mobile device used")
-       if country.lower() != 'lb':
-           risk = 'high'
-           risk_reasons.append("Login from outside Lebanon")
-   # Location mismatch detection (for all roles)
-   cur.execute('SELECT city, country FROM access_logs WHERE username = %s ORDER BY login_time DESC LIMIT 1', (username,))
-   last_location = cur.fetchone()
-   if last_location:
-       last_city, last_country = last_location
-       if last_city != city or last_country != country:
-           risk = 'high'
-           risk_reasons.append("Location mismatch with previous login")
-   # Insert access log
-   cur.execute('''
-       INSERT INTO access_logs (username, role, ip, login_time, risk, country, city, device)
-       VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-   ''', (username, role, ip_address, now.strftime("%Y-%m-%d %H:%M:%S"), risk, country, city, device))
-   conn.commit()
-   cur.close()
-   conn.close()
-   # Send alert if risk is high
-   if risk == 'high':
-       send_alert_email(username, ip_address, country, city, device)
-   # Store session info
-   session['user'] = username
-   session['role'] = role
-   session['ip'] = ip_address
-   session['device'] = device
-   session['risk'] = risk
-   session['risk_reason'] = risk_reasons if risk_reasons else ["Normal login conditions"]
-   session['time_context'] = 'day' if 8 <= hour < 18 else 'night'
-   session['allowed_page'] = 'dashboard'
-   return redirect('/dashboard')
-# --- Dashboard ---
+
+    username = request.form['username']
+
+    password = request.form['password']
+
+    ip_address = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
+
+    ua = request.user_agent.string.lower()
+
+    if 'iphone' in ua:
+
+        device = 'iPhone'
+
+    elif 'ipad' in ua:
+
+        device = 'iPad'
+
+    elif 'android' in ua:
+
+        device = 'Android Device'
+
+    elif 'windows' in ua:
+
+        device = 'Windows PC'
+
+    elif 'macintosh' in ua or 'mac os' in ua:
+
+        device = 'Mac'
+
+    elif 'linux' in ua:
+
+        device = 'Linux Device'
+
+    else:
+
+        device = 'Unknown'
+
+    conn = get_db_connection()
+
+    cur = conn.cursor()
+
+    # Lockdown check
+
+    cur.execute('SELECT active, end_time FROM system_lockdown ORDER BY id DESC LIMIT 1')
+
+    lockdown = cur.fetchone()
+
+    if lockdown:
+
+        active, end_time = lockdown
+
+        if active and end_time > datetime.datetime.now():
+
+            cur.execute('SELECT role FROM users WHERE username = %s', (username,))
+
+            result = cur.fetchone()
+
+            if result is None or result[0] != 'admin':
+
+                cur.close()
+
+                conn.close()
+
+                return jsonify({'status': 'error', 'message': '🚫 System under emergency lockdown.'})
+
+    # Credential check
+
+    cur.execute('SELECT * FROM users WHERE username = %s AND password = %s', (username, password))
+
+    user = cur.fetchone()
+
+    if not user:
+
+        cur.close()
+
+        conn.close()
+
+        return jsonify({'status': 'error', 'message': '❌ Invalid credentials'})
+
+    if user[8] != 'active':
+
+        cur.close()
+
+        conn.close()
+
+        return jsonify({'status': 'error', 'message': '❌ Your account is suspended or deleted.'})
+
+    # Blocked user check
+
+    cur.execute('SELECT 1 FROM blocked_users WHERE username = %s', (username,))
+
+    is_blocked = cur.fetchone()
+
+    if is_blocked:
+
+        cur.close()
+
+        conn.close()
+
+        return jsonify({'status': 'error', 'message': '❌ Your account is blocked by the admin.'})
+
+    # Multi-device check
+
+    cur.execute('SELECT device FROM active_sessions WHERE username = %s', (username,))
+
+    existing_session = cur.fetchone()
+
+    if existing_session and existing_session[0] != device:
+
+        cur.close()
+
+        conn.close()
+
+        return jsonify({'status': 'error', 'message': '❌ Multi-device login detected. Blocked.'})
+
+    # IP info
+
+    access_token = '56dd46be625f08'
+
+    handler = ipinfo.getHandler(access_token)
+
+    try:
+
+        details = handler.getDetails(ip_address)
+
+        info = details.all
+
+        country = info.get('country', 'Unknown')
+
+        city = info.get('city', 'Unknown')
+
+    except:
+
+        country = 'Unknown'
+
+        city = 'Unknown'
+
+    now = datetime.datetime.now()
+
+    weekday = now.weekday()
+
+    hour = now.hour
+
+    # Travel detection
+
+    cur.execute('SELECT country, login_time FROM travel_logs WHERE username = %s ORDER BY login_time DESC LIMIT 1', (username,))
+
+    last_travel = cur.fetchone()
+
+    if last_travel:
+
+        last_country, last_login_time = last_travel
+
+        if last_country != country:
+
+            time_diff_hours = (now - last_login_time).total_seconds() / 3600
+
+            if time_diff_hours <= 6:
+
+                cur.close()
+
+                conn.close()
+
+                return jsonify({'status': 'error', 'message': '❌ Travel detected in short time. Contact Admin.'})
+
+    # Insert travel log
+
+    cur.execute('INSERT INTO travel_logs (username, country, login_time) VALUES (%s, %s, %s)', (username, country, now))
+
+    conn.commit()
+
+    # Update session table
+
+    cur.execute('''
+
+        INSERT INTO active_sessions (username, ip, login_time, device)
+
+        VALUES (%s, %s, %s, %s)
+
+        ON CONFLICT (username) DO UPDATE SET ip=EXCLUDED.ip, login_time=EXCLUDED.login_time, device=EXCLUDED.device
+
+    ''', (username, ip_address, now, device))
+
+    conn.commit()
+
+    # Risk Evaluation
+
+    role = user[3]
+
+    risk = 'low'
+
+    risk_reasons = []
+
+    if role == 'admin':
+
+        if weekday >= 5:
+
+            risk = 'high'
+
+            risk_reasons.append("Weekend login")
+
+        if hour < 6:
+
+            risk = 'high'
+
+            risk_reasons.append("Login between 12 AM and 6 AM")
+
+        if device in ['iPhone', 'iPad', 'Android Device']:
+
+            risk = 'high'
+
+            risk_reasons.append("Mobile device used")
+
+        if country.lower() != 'lb':
+
+            risk = 'high'
+
+            risk_reasons.append("Login from outside Lebanon")
+
+    else:
+
+        if hour < 8 or hour >= 18:
+
+            risk = 'high'
+
+            risk_reasons.append("Login outside working hours")
+
+        if weekday >= 5:
+
+            risk = 'high'
+
+            risk_reasons.append("Weekend login")
+
+        if device in ['iPhone', 'iPad', 'Android Device', 'Unknown']:
+
+            risk = 'high'
+
+            risk_reasons.append("Mobile device used")
+
+        if country.lower() != 'lb':
+
+            risk = 'high'
+
+            risk_reasons.append("Login from outside Lebanon")
+
+    # Location mismatch detection
+
+    cur.execute('SELECT city, country FROM access_logs WHERE username = %s ORDER BY login_time DESC LIMIT 1', (username,))
+
+    last_location = cur.fetchone()
+
+    if last_location:
+
+        last_city, last_country = last_location
+
+        if last_city != city or last_country != country:
+
+            risk = 'high'
+
+            risk_reasons.append("Location mismatch with previous login")
+
+    # Insert access log
+
+    cur.execute('''
+
+        INSERT INTO access_logs (username, role, ip, login_time, risk, country, city, device)
+
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+
+    ''', (username, role, ip_address, now.strftime("%Y-%m-%d %H:%M:%S"), risk, country, city, device))
+
+    conn.commit()
+
+    cur.close()
+
+    conn.close()
+
+    if risk == 'high':
+
+        send_alert_email(username, ip_address, country, city, device)
+
+    session['user'] = username
+
+    session['role'] = role
+
+    session['ip'] = ip_address
+
+    session['device'] = device
+
+    session['risk'] = risk
+
+    session['risk_reason'] = risk_reasons if risk_reasons else ["Normal login conditions"]
+
+    session['time_context'] = 'day' if 8 <= hour < 18 else 'night'
+
+    session['allowed_page'] = 'dashboard'
+
+    return jsonify({'status': 'success', 'redirect': '/dashboard'})
+ 
 # --- Dashboard ---
 @app.route('/dashboard')
 @login_required()
