@@ -231,7 +231,7 @@ def login():
    session['ip'] = ip_address
    session['device'] = device
    session['risk'] = risk
-   session['risk_reason'] = ', '.join(risk_reasons) if risk_reasons else 'Normal login conditions'
+   session['risk_reason'] = risk_reasons if risk_reasons else ["Normal login conditions"]
    session['time_context'] = 'day' if 8 <= hour < 18 else 'night'
    session['allowed_page'] = 'dashboard'
    return redirect('/dashboard')
