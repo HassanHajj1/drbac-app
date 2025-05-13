@@ -13,7 +13,25 @@ import re
 import os
 import psycopg2
 from flask import jsonify
+import requests
 
+def is_ip_malicious_virustotal(ip_address):
+   api_key = 'ff9ba630e04a597946dcb167ad45d0e3f702a6e0f1bc8e87f82568b35060ad73'
+   url = f"https://www.virustotal.com/api/v3/ip_addresses/{ip_address}"
+   headers = {"x-apikey": api_key}
+   try:
+       response = requests.get(url, headers=headers)
+       if response.status_code == 200:
+           data = response.json()
+           stats = data['data']['attributes']['last_analysis_stats']
+           malicious = stats.get('malicious', 0)
+           suspicious = stats.get('suspicious', 0)
+           if malicious > 0 or suspicious > 0:
+               return True
+       return False
+   except Exception as e:
+       print(f"VirusTotal IP check failed: {e}")
+       return False
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -100,7 +118,8 @@ def login():
     password = request.form['password']
 
     ip_address = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
-
+    if is_ip_malicious_virustotal(ip_address):
+        return '❌ Login blocked: Your IP address is flagged as malicious.'
     ua = request.user_agent.string.lower()
 
     if 'iphone' in ua:
