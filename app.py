@@ -117,7 +117,8 @@ def login():
 
     password = request.form['password']
 
-    ip_address = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
+    ip_address = '45.83.64.1'
+ 
     if is_ip_malicious_virustotal(ip_address):
         return '❌ Login blocked: Your IP address is flagged as malicious.'
     ua = request.user_agent.string.lower()
