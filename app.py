@@ -118,10 +118,7 @@ def login():
     password = request.form['password']
 
     ip_address = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
-    if is_ip_malicious_virustotal(ip_address):
-        cur.close()
-        conn.close()
-        return jsonify({'status': 'error', 'message': '❌ Cannot login: Malicious IP detected.'})
+
     ua = request.user_agent.string.lower()
 
     if 'iphone' in ua:
@@ -155,7 +152,10 @@ def login():
     conn = get_db_connection()
 
     cur = conn.cursor()
-
+    if is_ip_malicious_virustotal(ip_address):
+        cur.close()
+        conn.close()
+        return jsonify({'status': 'error', 'message': '❌ Cannot login: Malicious IP detected.'})
     # Lockdown check
 
     cur.execute('SELECT active, end_time FROM system_lockdown ORDER BY id DESC LIMIT 1')
