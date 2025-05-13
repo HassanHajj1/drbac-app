@@ -6,90 +6,171 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
 <style>
-   body {
-     background-color: #0d1117;
-     color: #ffffff;
-     font-family: 'Orbitron', sans-serif;
-     margin: 0;
-     padding: 0;
-   }
-   .navbar {
-     background-color: #161b22;
-     padding: 1rem;
-     text-align: center;
-   }
-   .navbar a {
-     color: #58a6ff;
-     margin: 0 1rem;
-     text-decoration: none;
-   }
-   .navbar a:hover {
-     color: #ffffff;
-   }
-   .container {
-     max-width: 1100px;
-     margin: 2rem auto;
-     padding: 1rem;
-   }
-   h2 {
-     text-align: center;
-     margin-bottom: 1rem;
-   }
-   form.filters {
-     display: flex;
-     justify-content: center;
-     gap: 1rem;
-     margin-bottom: 1.5rem;
-     flex-wrap: wrap;
-   }
-   input, select {
-     padding: 0.5rem;
-     border-radius: 5px;
-     border: 1px solid #30363d;
-     background-color: #0d1117;
-     color: white;
-   }
-   .btn {
-     background-color: #0d6efd;
-     border: none;
-     padding: 0.5rem 1rem;
-     color: white;
-     border-radius: 5px;
-     cursor: pointer;
-   }
-   .btn:hover {
-     background-color: #1f77ff;
-   }
-   table {
-     width: 100%;
-     border-collapse: collapse;
-     margin-top: 1rem;
-   }
-   th, td {
-     border: 1px solid #30363d;
-     padding: 0.75rem;
-     text-align: center;
-   }
-   th {
-     background-color: #21262d;
-   }
-   .pagination {
-     text-align: center;
-     margin-top: 2rem;
-   }
-   .pagination a {
-     color: #58a6ff;
-     margin: 0 0.5rem;
-     text-decoration: none;
-   }
-   .pagination a.active {
-     color: white;
-     font-weight: bold;
-   }
+
+  body {
+
+    background-color: #0d1117;
+
+    color: #ffffff;
+
+    font-family: 'Orbitron', sans-serif;
+
+    margin: 0;
+
+    padding: 0;
+
+  }
+
+  .navbar {
+
+    background-color: #161b22;
+
+    padding: 1rem;
+
+    text-align: center;
+
+  }
+
+  .navbar a {
+
+    color: #58a6ff;
+
+    margin: 0 1rem;
+
+    text-decoration: none;
+
+  }
+
+  .navbar a:hover {
+
+    color: #ffffff;
+
+  }
+
+  .container {
+
+    max-width: 1100px;
+
+    margin: 2rem auto;
+
+    padding: 1rem;
+
+  }
+
+  h2 {
+
+    text-align: center;
+
+    margin-bottom: 1rem;
+
+  }
+
+  form.filters {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 1rem;
+
+    margin-bottom: 1.5rem;
+
+    flex-wrap: wrap;
+
+  }
+
+  input, select {
+
+    padding: 0.5rem;
+
+    border-radius: 5px;
+
+    border: 1px solid #30363d;
+
+    background-color: #0d1117;
+
+    color: white;
+
+  }
+
+  .btn {
+
+    background-color: #0d6efd;
+
+    border: none;
+
+    padding: 0.5rem 1rem;
+
+    color: white;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+
+  }
+
+  .btn:hover {
+
+    background-color: #1f77ff;
+
+  }
+
+  table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    margin-top: 1rem;
+
+  }
+
+  th, td {
+
+    border: 1px solid #30363d;
+
+    padding: 0.75rem;
+
+    text-align: center;
+
+  }
+
+  th {
+
+    background-color: #21262d;
+
+  }
+
+  .pagination {
+
+    text-align: center;
+
+    margin-top: 2rem;
+
+  }
+
+  .pagination a {
+
+    color: #58a6ff;
+
+    margin: 0 0.5rem;
+
+    text-decoration: none;
+
+  }
+
+  .pagination a.active {
+
+    color: white;
+
+    font-weight: bold;
+
+  }
 </style>
 </head>
 <body>
- {% include 'navbar.html' %}
+
+  {% include 'navbar.html' %}
 <div class="container">
 <h2>🚨 Suspicious Login Reports</h2>
 <form method="GET" action="/admin_suspicious_reports" class="filters">
@@ -112,7 +193,8 @@
 </tr>
 </thead>
 <tbody>
-       {% for report in reports %}
+
+  {% for report in reports %}
 <tr>
 <td>{{ report[0] }}</td>
 <td>{{ report[1] }}</td>
@@ -123,21 +205,69 @@
 <td>{{ report[2] }}</td>
 <td>{{ report[3] }}</td>
 <td>
-<a href="/block_ip/{{ report[4] }}" class="btn">Block IP</a>
+<button class="btn" onclick="confirmAndBlockIP('{{ report[4] }}', this)">Block IP</button>
 </td>
 </tr>
-       {% endfor %}
+
+  {% endfor %}
 </tbody>
 </table>
 <div class="pagination">
-     {% if page > 1 %}
+
+  {% if page > 1 %}
 <a href="/admin_suspicious_reports?page={{ page - 1 }}{% if request.args.get('user') %}&user={{ request.args.get('user') }}{% endif %}{% if request.args.get('date') %}&date={{ request.args.get('date') }}{% endif %}">« Prev</a>
-     {% endif %}
+
+  {% endif %}
 <a class="active">Page {{ page }}</a>
-     {% if has_next %}
+
+  {% if has_next %}
 <a href="/admin_suspicious_reports?page={{ page + 1 }}{% if request.args.get('user') %}&user={{ request.args.get('user') }}{% endif %}{% if request.args.get('date') %}&date={{ request.args.get('date') }}{% endif %}">Next »</a>
-     {% endif %}
+
+  {% endif %}
 </div>
 </div>
+<script>
+
+function confirmAndBlockIP(ip, button) {
+
+  if (!confirm('Are you sure you want to block this IP: ' + ip + '?')) return;
+
+  fetch('/block_ip/' + ip, { method: 'POST' })
+
+    .then(res => res.json())
+
+    .then(data => {
+
+      if (data.status === 'success') {
+
+        button.disabled = true;
+
+        button.textContent = "IP Blocked";
+
+        button.style.backgroundColor = '#28a745';
+
+      } else {
+
+        button.textContent = "Error";
+
+        button.style.backgroundColor = '#dc3545';
+
+      }
+
+    })
+
+    .catch(err => {
+
+      console.error('Block failed:', err);
+
+      button.textContent = "Error";
+
+      button.style.backgroundColor = '#dc3545';
+
+    });
+
+}
+</script>
 </body>
 </html>
+ 
