@@ -119,7 +119,9 @@ def login():
 
     ip_address = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
     if is_ip_malicious_virustotal(ip_address):
-        return '❌ Login blocked: Your IP address is flagged as malicious.'
+        cur.close()
+        conn.close()
+        return jsonify({'status': 'error', 'message': '❌ Cannot login: Malicious IP detected.'})
     ua = request.user_agent.string.lower()
 
     if 'iphone' in ua:
