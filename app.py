@@ -690,19 +690,27 @@ def admin_suspicious_reports():
    return render_template('admin_suspicious_reports.html', reports=reports, page=page, has_next=has_next,  role=session['role'])
 
 # --- Lock User Account ---
-@app.route('/block_ip/<ip>')
+@app.route('/block_ip/<ip>', methods=['POST'])
 @login_required(role='admin')
 def block_ip(ip):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('INSERT INTO blocked_ips (ip) VALUES (%s) ON CONFLICT DO NOTHING', (ip,))
-    cur.execute('''INSERT INTO admin_logs (admin_username, action, target_username)
-                  VALUES (%s, %s, %s)''', (session['user'], 'Blocked IP from report', ip))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return redirect('/admin_suspicious_reports')
-
+    try:
+        cur.execute('INSERT INTO blocked_ips (ip) VALUES (%s) ON CONFLICT DO NOTHING', (ip,))
+        cur.execute('''
+            INSERT INTO admin_logs (admin_username, action, target_username)
+            VALUES (%s, %s, %s)
+        ''', (session['user'], 'Blocked IP', ip))
+        conn.commit()
+        status = 'success'
+    except Exception as e:
+        print("Error blocking IP:", e)
+        conn.rollback()
+        status = 'error'
+    finally:
+        cur.close()
+        conn.close()
+    return jsonify({'status': status})
  #--- Admin Users ---
 @app.route('/admin_users', methods=['GET', 'POST'])
 
