@@ -152,10 +152,18 @@ def login():
     conn = get_db_connection()
 
     cur = conn.cursor()
+    # malicious ip check
     if is_ip_malicious_virustotal(ip_address):
         cur.close()
         conn.close()
         return jsonify({'status': 'error', 'message': '❌ Cannot login: Malicious IP detected.'})
+    
+    #blacklisted ip check
+    cur.execute('SELECT 1 FROM blacklisted_ips WHERE ip = %s', (ip_address,))
+    if cur.fetchone():
+        cur.close()
+        conn.close()
+        return jsonify({'status': 'error', 'message': '❌ Login blocked: IP is blacklisted.'})
     # Lockdown check
 
     cur.execute('SELECT active, end_time FROM system_lockdown ORDER BY id DESC LIMIT 1')
@@ -682,30 +690,18 @@ def admin_suspicious_reports():
    return render_template('admin_suspicious_reports.html', reports=reports, page=page, has_next=has_next,  role=session['role'])
 
 # --- Lock User Account ---
-@app.route('/lock_account/<username>')
+@app.route('/block_ip/<ip>')
 @login_required(role='admin')
-def lock_account(username):
-   conn = get_db_connection()
-   cur = conn.cursor()
-   cur.execute('UPDATE users SET locked = TRUE WHERE username = %s', (username,))
-   cur.execute('''INSERT INTO admin_logs (admin_username, action, target_username) VALUES (%s, %s, %s)''', (session['user'], 'Locked Account', username))
-   conn.commit()
-   cur.close()
-   conn.close()
-   return redirect('/admin_suspicious_reports')
-
-# --- Unlock User Account ---
-@app.route('/unlock_account/<username>')
-@login_required(role='admin')
-def unlock_account(username):
-   conn = get_db_connection()
-   cur = conn.cursor()
-   cur.execute('UPDATE users SET locked = FALSE WHERE username = %s', (username,))
-   cur.execute('''INSERT INTO admin_logs (admin_username, action, target_username) VALUES (%s, %s, %s)''', (session['user'], 'Unlocked Account', username))
-   conn.commit()
-   cur.close()
-   conn.close()
-   return redirect('/admin_suspicious_reports')
+def block_ip(ip):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('INSERT INTO blocked_ips (ip) VALUES (%s) ON CONFLICT DO NOTHING', (ip,))
+    cur.execute('''INSERT INTO admin_logs (admin_username, action, target_username)
+                  VALUES (%s, %s, %s)''', (session['user'], 'Blocked IP from report', ip))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect('/admin_suspicious_reports')
 
  #--- Admin Users ---
 @app.route('/admin_users', methods=['GET', 'POST'])
