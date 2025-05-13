@@ -159,7 +159,7 @@ def login():
         return jsonify({'status': 'error', 'message': '❌ Cannot login: Malicious IP detected.'})
     
     #blacklisted ip check
-    cur.execute('SELECT 1 FROM blacklisted_ips WHERE ip = %s', (ip_address,))
+    cur.execute('SELECT 1 FROM blocked_ips WHERE ip = %s', (ip_address,))
     if cur.fetchone():
         cur.close()
         conn.close()
