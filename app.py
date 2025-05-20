@@ -33,6 +33,41 @@ def is_ip_malicious_virustotal(ip_address):
        print(f"VirusTotal IP check failed: {e}")
        return False
 
+def evaluate_risk(data):
+    username = data.get("username", "")
+    device = data.get("device", "").lower()
+    location = data.get("location", "").lower()
+    login_time = data.get("time", "")  # format "HH:MM"
+ 
+    risk_score = 0
+ 
+    # Rule 1: Unknown or suspicious device
+    if device in ["unknown", "linux vm", "tor browser"]:
+        risk_score += 2
+ 
+    # Rule 2: Suspicious location
+    if location not in ["lebanon", "france", "usa"]:
+        risk_score += 2
+ 
+    # Rule 3: Suspicious login time (e.g., late night)
+    try:
+        hour = int(login_time.split(":")[0])
+        if hour < 6 or hour > 22:
+            risk_score += 1
+    except:
+        risk_score += 1
+ 
+    # Rule 4: Admins get more strict evaluation
+    if username.lower() == "admin":
+        risk_score += 1
+ 
+    # Final risk level
+    if risk_score >= 4:
+        return "High"
+    elif risk_score >= 2:
+        return "Medium"
+    else:
+        return "Safe"
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
  
@@ -99,7 +134,12 @@ def login_required(role=None):
             return f(*args, **kwargs)
         return decorated_function
     return wrapper
- 
+
+@app.route('/simulate_login', methods=['POST'])
+def simulate_login():
+    data = request.json
+    risk = evaluate_risk(data)
+    return jsonify({"risk": risk}) 
 # --- Home ---
 @app.route('/')
 def home():
