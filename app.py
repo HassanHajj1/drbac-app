@@ -311,7 +311,7 @@ def login():
 
         city = 'Unknown'
 
-    now = datetime.datetime.now()
+    now = datetime.now()
 
     weekday = now.weekday()
 
@@ -605,7 +605,7 @@ def blocked_users():
 def start_lockdown():
     conn = get_db_connection()
     cur = conn.cursor()
-    now = datetime.datetime.now()
+    now = datetime.now()
     end_time = now + datetime.timedelta(hours=6)  # lockdown lasts 6 hours
     cur.execute('INSERT INTO system_lockdown (active, start_time, end_time) VALUES (TRUE, %s, %s)', (now, end_time))
     conn.commit()
