@@ -17,8 +17,9 @@ results = {"TP": 0, "FP": 0, "TN": 0, "FN": 0}
  
 def simulate():
     for i in range(100):
-        user = random.choice(users)
-        ground_truth = user.pop("is_attack")  # Get actual label
+        original = random.choice(users)
+        user = original.copy()  # Prevent pop() from modifying original list
+        ground_truth = user.pop("is_attack")
         try:
             response = requests.post(URL, json=user)
             risk = response.json().get("risk")
