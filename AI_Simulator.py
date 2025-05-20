@@ -2,8 +2,7 @@ import requests
 import random
  
 # Replace this with your real Render app URL once deployed
-URL = "https://drbac-app-1.onrender.com"
- 
+URL = "https://drbac-app-1.onrender.com/simulate_login" 
 # Define test cases
 users = [
     {"username": "admin", "device": "iPhone", "location": "Lebanon", "time": "10:00", "is_attack": False},
