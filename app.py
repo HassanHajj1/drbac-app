@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, send_file, make_response
 import psycopg2
 import socket
-import datetime
+from datetime import datetime
 import csv
 import io
 import ipinfo
@@ -39,7 +39,7 @@ def evaluate_risk(data):
     location = data.get("location", "").lower()
     login_time = data.get("time", "")  # format "HH:MM"
     ip_address = data.get("ip", "")  # optional field if you include IP
-    weekday = datetime.today().weekday()  # 0 = Monday, 6 = Sunday
+    weekday = datetime.now().weekday()  # 0 = Monday, 6 = Sunday
  
     risk_score = 0
  
