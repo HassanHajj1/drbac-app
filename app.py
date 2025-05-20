@@ -38,10 +38,12 @@ def evaluate_risk(data):
     device = data.get("device", "").lower()
     location = data.get("location", "").lower()
     login_time = data.get("time", "")  # format "HH:MM"
+    ip_address = data.get("ip", "")  # optional field if you include IP
+    weekday = datetime.today().weekday()  # 0 = Monday, 6 = Sunday
  
     risk_score = 0
  
-    # Rule 1: Unknown or suspicious device
+    # Rule 1: Suspicious device
     if device in ["unknown", "linux vm", "tor browser"]:
         risk_score += 2
  
@@ -49,7 +51,7 @@ def evaluate_risk(data):
     if location not in ["lebanon", "france", "usa"]:
         risk_score += 2
  
-    # Rule 3: Suspicious login time (e.g., late night)
+    # Rule 3: Suspicious login time
     try:
         hour = int(login_time.split(":")[0])
         if hour < 6 or hour > 22:
@@ -57,17 +59,26 @@ def evaluate_risk(data):
     except:
         risk_score += 1
  
-    # Rule 4: Admins get more strict evaluation
+    # Rule 4: Weekend login
+    if weekday in [5, 6]:  # Saturday = 5, Sunday = 6
+        risk_score += 1
+ 
+    # Rule 5: Suspicious IP pattern (you can customize this)
+    if ip_address.startswith("185.") or ip_address.startswith("89.") or ip_address.startswith("37."):
+        risk_score += 2
+ 
+    # Rule 6: Admin strict rule
     if username.lower() == "admin":
         risk_score += 1
  
-    # Final risk level
-    if risk_score >= 4:
+    # Final decision
+    if risk_score >= 5:
         return "High"
-    elif risk_score >= 2:
+    elif risk_score >= 3:
         return "Medium"
     else:
         return "Safe"
+
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
  

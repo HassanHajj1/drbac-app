@@ -5,14 +5,25 @@ import random
 URL = "https://drbac-app-1.onrender.com/simulate_login" 
 # Define test cases
 users = [
-    {"username": "admin", "device": "iPhone", "location": "Lebanon", "time": "10:00", "is_attack": False},
-    {"username": "admin", "device": "Linux VM", "location": "Russia", "time": "03:00", "is_attack": True},
-    {"username": "hassan", "device": "Samsung", "location": "Lebanon", "time": "11:00", "is_attack": False},
-    {"username": "hassan", "device": "Unknown", "location": "Brazil", "time": "02:00", "is_attack": True},
-    {"username": "john", "device": "Macbook", "location": "Germany", "time": "23:30", "is_attack": True},
-    {"username": "maria", "device": "Samsung", "location": "Lebanon", "time": "13:00", "is_attack": False}
-]
+    # ✅ Legit logins
+    {"username": "admin", "device": "iPhone", "location": "Lebanon", "time": "10:00", "ip": "10.0.0.1", "is_attack": False},
+    {"username": "hassan", "device": "Samsung", "location": "Lebanon", "time": "11:00", "ip": "10.0.0.5", "is_attack": False},
+    {"username": "maria", "device": "Macbook", "location": "France", "time": "14:00", "ip": "10.10.10.10", "is_attack": False},
  
+    # ⚠️ Suspicious logins (Time, Location, IP)
+    {"username": "admin", "device": "Linux VM", "location": "Russia", "time": "03:00", "ip": "185.76.23.5", "is_attack": True},
+    {"username": "hassan", "device": "Unknown", "location": "Brazil", "time": "02:00", "ip": "89.12.45.67", "is_attack": True},
+    {"username": "john", "device": "Tor Browser", "location": "Iran", "time": "00:30", "ip": "37.45.89.1", "is_attack": True},
+ 
+    # 😬 Suspicious weekend login (adjust based on today)
+    {"username": "admin", "device": "iPhone", "location": "Lebanon", "time": "05:00", "ip": "10.0.0.1", "is_attack": True},
+    {"username": "maria", "device": "Samsung", "location": "Germany", "time": "23:00", "ip": "185.44.12.1", "is_attack": True},
+ 
+    # ✅ More legit users
+    {"username": "hassan", "device": "Samsung", "location": "Lebanon", "time": "13:00", "ip": "10.1.1.1", "is_attack": False},
+    {"username": "admin", "device": "iPhone", "location": "USA", "time": "15:00", "ip": "10.0.0.10", "is_attack": False}
+]
+
 results = {"TP": 0, "FP": 0, "TN": 0, "FN": 0}
  
 def simulate():
