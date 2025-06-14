@@ -14,6 +14,12 @@ import os
 import psycopg2
 from flask import jsonify
 import requests
+import bcrypt
+ 
+def hash_password(plain_password):
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(plain_password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
 
 def is_ip_malicious_virustotal(ip_address):
    api_key = 'ff9ba630e04a597946dcb167ad45d0e3f702a6e0f1bc8e87f82568b35060ad73'
@@ -252,6 +258,14 @@ def login():
         conn.close()
 
         return jsonify({'status': 'error', 'message': '❌ Invalid credentials'})
+    
+    stored_hashed_password = user[2]  
+    if not bcrypt.checkpw(password.encode('utf-8'), stored_hashed_password.encode('utf-8')):
+        cur.close()
+        conn.close()
+        return jsonify({'status': 'error', 'message': '❌ Invalid credentials'})
+
+
 
     if user[8] != 'active':
 
@@ -798,7 +812,8 @@ def admin_users():
                 error = '❌ Weak password. Must have letters, numbers, special characters, min 8 chars.'
 
             else:
-
+                hashed_pw = hash_password(password)
+     
                 cur.execute("""
 
                 INSERT INTO users (username, password, role, email, phone_number, status)
