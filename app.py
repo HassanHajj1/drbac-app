@@ -15,6 +15,7 @@ import psycopg2
 from flask import jsonify
 import requests
 import bcrypt
+from utils import hash_password  
 
 def hash_password(plain_password):
     salt = bcrypt.gensalt()
@@ -776,199 +777,117 @@ def block_ip(ip):
         conn.close()
     return jsonify({'status': status})
  #--- Admin Users ---
+ 
 @app.route('/admin_users', methods=['GET', 'POST'])
-
 @login_required(role='admin')
-
 def admin_users():
-
     message = None
-
     error = None
  
     conn = get_db_connection()
-
     cur = conn.cursor()
  
     try:
-
         # --- Handle Create User ---
-
         if request.method == 'POST' and 'create_user' in request.form:
-
             username = request.form['username']
-
             password = request.form['password']
-
             role = request.form['role']
-
             email = request.form['email']
-
             phone = request.form['phone']
  
             if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$', password):
-
                 error = '❌ Weak password. Must have letters, numbers, special characters, min 8 chars.'
-
             else:
                 hashed_pw = hash_password(password)
-     
                 cur.execute("""
-
-                INSERT INTO users (username, password, role, email, phone_number, status)
-
-                VALUES (%s, %s, %s, %s, %s, 'active')
-
-                """, (username, password, role, email, phone))
-
+                    INSERT INTO users (username, password, role, email, phone_number, status)
+                    VALUES (%s, %s, %s, %s, %s, 'active')
+                """, (username, hashed_pw, role, email, phone))
                 cur.execute("""
-
-                INSERT INTO admin_logs (admin_username, action, target_username)
-
-                VALUES (%s, %s, %s)
-
+                    INSERT INTO admin_logs (admin_username, action, target_username)
+                    VALUES (%s, %s, %s)
                 """, (session['user'], 'Created user', username))
-
                 conn.commit()
-
                 message = f'✅ User {username} created successfully!'
  
         # --- Handle Edit User ---
-
         if request.method == 'POST' and 'edit_user' in request.form:
-
             uid = request.form['user_id']
-
             email = request.form['email']
-
             phone = request.form['phone']
-
             role = request.form['role']
-
             password = request.form.get('password')
  
             cur.execute('SELECT username FROM users WHERE id = %s', (uid,))
-
             target_user = cur.fetchone()[0]
  
             if password:
-
                 if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$', password):
-
                     error = '❌ Weak password. Must have letters, numbers, special characters, min 8 chars.'
-
                 else:
-
+                    hashed_pw = hash_password(password)
                     cur.execute('UPDATE users SET email=%s, phone_number=%s, role=%s, password=%s WHERE id=%s',
-
-                                (email, phone, role, password, uid))
-
+                                (email, phone, role, hashed_pw, uid))
                     cur.execute("""
-
-                    INSERT INTO admin_logs (admin_username, action, target_username)
-
-                    VALUES (%s, %s, %s)
-
+                        INSERT INTO admin_logs (admin_username, action, target_username)
+                        VALUES (%s, %s, %s)
                     """, (session['user'], 'Edited user + password', target_user))
-
                     conn.commit()
-
                     message = f'✅ User ID {uid} updated with new password.'
-
             else:
-
                 cur.execute('UPDATE users SET email=%s, phone_number=%s, role=%s WHERE id=%s',
-
                             (email, phone, role, uid))
-
                 cur.execute("""
-
-                INSERT INTO admin_logs (admin_username, action, target_username)
-
-                VALUES (%s, %s, %s)
-
+                    INSERT INTO admin_logs (admin_username, action, target_username)
+                    VALUES (%s, %s, %s)
                 """, (session['user'], 'Edited user', target_user))
-
                 conn.commit()
-
                 message = f'✅ User ID {uid} updated successfully.'
  
         # --- Handle Reset Password ---
-
         if request.method == 'POST' and 'reset_password' in request.form:
-
             uid = request.form['user_id']
-
             new_password = request.form['password']
  
             if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$', new_password):
-
                 error = '❌ Weak password. Must have letters, numbers, special characters, min 8 chars.'
-
             else:
-
-                cur.execute('UPDATE users SET password=%s WHERE id=%s', (new_password, uid))
-
+                hashed_pw = hash_password(new_password)
+                cur.execute('UPDATE users SET password=%s WHERE id=%s', (hashed_pw, uid))
                 cur.execute('SELECT username FROM users WHERE id = %s', (uid,))
-
                 uname = cur.fetchone()[0]
-
                 cur.execute("""
-
-                INSERT INTO admin_logs (admin_username, action, target_username)
-
-                VALUES (%s, %s, %s)
-
+                    INSERT INTO admin_logs (admin_username, action, target_username)
+                    VALUES (%s, %s, %s)
                 """, (session['user'], 'Reset password', uname))
-
                 conn.commit()
-
                 message = f'✅ Password reset successfully for user ID {uid}.'
  
         # --- Handle Delete User ---
-
         if request.method == 'POST' and 'delete_user' in request.form:
-
             uid = request.form['user_id']
-
             cur.execute('UPDATE users SET status=%s WHERE id=%s', ('deleted', uid))
-
             cur.execute('SELECT username FROM users WHERE id = %s', (uid,))
-
             uname = cur.fetchone()[0]
-
             cur.execute("""
-
-            INSERT INTO admin_logs (admin_username, action, target_username)
-
-            VALUES (%s, %s, %s)
-
+                INSERT INTO admin_logs (admin_username, action, target_username)
+                VALUES (%s, %s, %s)
             """, (session['user'], 'Soft-deleted user', uname))
-
             conn.commit()
-
             message = f'✅ User ID {uid} soft-deleted.'
  
     except Exception as e:
-
         error = f'❌ Error: {str(e)}'
-
         conn.rollback()
  
     # Fetch users
-
     cur.execute('SELECT id, username, email, phone_number, role, status FROM users ORDER BY id')
-
     users = cur.fetchall()
- 
     cur.close()
-
     conn.close()
  
-    return make_response(render_template('admin_users.html', users=users, message=message, error=error,  role=session['role']))
-
- 
-# --- Active Users ---
+    return make_response(render_template('admin_users.html', users=users, message=message, error=error, role=session['role']))
  
 @app.route('/active_users')
 @login_required(role='admin')
