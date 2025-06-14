@@ -247,8 +247,7 @@ def login():
 
     # Credential check
 
-    cur.execute('SELECT * FROM users WHERE username = %s AND password = %s', (username, password))
-
+    cur.execute('SELECT * FROM users WHERE username = %s', (username,))
     user = cur.fetchone()
 
     if not user:
