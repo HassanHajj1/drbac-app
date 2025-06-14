@@ -15,7 +15,7 @@ import psycopg2
 from flask import jsonify
 import requests
 import bcrypt
- 
+
 def hash_password(plain_password):
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(plain_password.encode('utf-8'), salt)
@@ -1148,7 +1148,25 @@ def logout():
     session.clear()
 
     return redirect('/')
+
  
+@app.route('/hash_existing_passwords')
+def hash_existing_passwords():
+    conn = get_db_connection()
+    cur = conn.cursor()
+ 
+    # Get all user IDs and plain text passwords
+    cur.execute("SELECT id, password FROM users")
+    users = cur.fetchall()
+ 
+    for user_id, plain_pass in users:
+        hashed_pw = hash_password(plain_pass)
+        cur.execute("UPDATE users SET password = %s WHERE id = %s", (hashed_pw, user_id))
+ 
+    conn.commit()
+    cur.close()
+    conn.close()
+    return "✅ Passwords successfully hashed in the database!"
 # --- Main ---
 
 if __name__ == '__main__':
