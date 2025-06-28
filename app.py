@@ -555,11 +555,33 @@ def admin_logs():
 def admin_activity_logs():
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('SELECT admin_username, action, target_username, action_time FROM admin_logs ORDER BY action_time DESC')
+ 
+    admin = request.args.get('admin')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+ 
+    query = "SELECT admin_username, action, target_username, action_time FROM admin_logs WHERE 1=1"
+    filters = []
+ 
+    if admin:
+        query += " AND admin_username ILIKE %s"
+        filters.append(f"%{admin}%")
+ 
+    if start_date:
+        query += " AND DATE(action_time) >= %s"
+        filters.append(start_date)
+ 
+    if end_date:
+        query += " AND DATE(action_time) <= %s"
+        filters.append(end_date)
+ 
+    query += " ORDER BY action_time DESC"
+    cur.execute(query, tuple(filters))
     logs = cur.fetchall()
+ 
     cur.close()
     conn.close()
-    return render_template('admin_activity_logs.html', logs=logs,  role=session['role'])
+    return render_template('admin_activity_logs.html', logs=logs, role=session['role'])
 # --- Block User ---
 @app.route('/block_user/<username>')
 @login_required(role='admin')
