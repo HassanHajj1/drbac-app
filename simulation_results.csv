@@ -1,101 +1,101 @@
-timestamp,username,device,location,time,ip,actual,risk
-2025-05-20 22:43:57,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
-2025-05-20 22:43:58,admin,iPhone,Lebanon,05:00,10.0.0.1,Attack,Safe
-2025-05-20 22:43:58,maria,Samsung,Germany,23:00,185.44.12.1,Attack,High
-2025-05-20 22:43:59,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
-2025-05-20 22:44:00,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
-2025-05-20 22:44:00,admin,iPhone,Lebanon,10:00,10.0.0.1,Legit,Safe
-2025-05-20 22:44:00,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:01,hassan,Samsung,Lebanon,11:00,10.0.0.5,Legit,Safe
-2025-05-20 22:44:02,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High
-2025-05-20 22:44:02,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:03,hassan,Samsung,Lebanon,11:00,10.0.0.5,Legit,Safe
-2025-05-20 22:44:03,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High
-2025-05-20 22:44:03,admin,iPhone,USA,15:00,10.0.0.10,Legit,Safe
-2025-05-20 22:44:04,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
-2025-05-20 22:44:04,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:05,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:06,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
-2025-05-20 22:44:06,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:07,admin,iPhone,Lebanon,10:00,10.0.0.1,Legit,Safe
-2025-05-20 22:44:08,maria,Samsung,Germany,23:00,185.44.12.1,Attack,High
-2025-05-20 22:44:08,maria,Samsung,Germany,23:00,185.44.12.1,Attack,High
-2025-05-20 22:44:10,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:12,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:13,hassan,Samsung,Lebanon,13:00,10.1.1.1,Legit,Safe
-2025-05-20 22:44:14,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High
-2025-05-20 22:44:14,admin,iPhone,Lebanon,10:00,10.0.0.1,Legit,Safe
-2025-05-20 22:44:14,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High
-2025-05-20 22:44:15,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High
-2025-05-20 22:44:15,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:16,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High
-2025-05-20 22:44:16,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
-2025-05-20 22:44:17,hassan,Samsung,Lebanon,13:00,10.1.1.1,Legit,Safe
-2025-05-20 22:44:17,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:17,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:18,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:18,hassan,Samsung,Lebanon,13:00,10.1.1.1,Legit,Safe
-2025-05-20 22:44:19,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:19,admin,iPhone,Lebanon,10:00,10.0.0.1,Legit,Safe
-2025-05-20 22:44:19,admin,iPhone,Lebanon,10:00,10.0.0.1,Legit,Safe
-2025-05-20 22:44:20,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
-2025-05-20 22:44:20,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:21,hassan,Samsung,Lebanon,11:00,10.0.0.5,Legit,Safe
-2025-05-20 22:44:21,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:22,admin,iPhone,Lebanon,10:00,10.0.0.1,Legit,Safe
-2025-05-20 22:44:23,admin,iPhone,Lebanon,10:00,10.0.0.1,Legit,Safe
-2025-05-20 22:44:23,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:23,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:24,maria,Samsung,Germany,23:00,185.44.12.1,Attack,High
-2025-05-20 22:44:24,admin,iPhone,Lebanon,05:00,10.0.0.1,Attack,Safe
-2025-05-20 22:44:24,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:25,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:25,admin,iPhone,Lebanon,10:00,10.0.0.1,Legit,Safe
-2025-05-20 22:44:26,hassan,Samsung,Lebanon,13:00,10.1.1.1,Legit,Safe
-2025-05-20 22:44:26,admin,iPhone,Lebanon,05:00,10.0.0.1,Attack,Safe
-2025-05-20 22:44:27,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:27,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:28,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
-2025-05-20 22:44:28,admin,iPhone,USA,15:00,10.0.0.10,Legit,Safe
-2025-05-20 22:44:28,admin,iPhone,Lebanon,05:00,10.0.0.1,Attack,Safe
-2025-05-20 22:44:29,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High
-2025-05-20 22:44:29,hassan,Samsung,Lebanon,11:00,10.0.0.5,Legit,Safe
-2025-05-20 22:44:30,admin,iPhone,Lebanon,05:00,10.0.0.1,Attack,Safe
-2025-05-20 22:44:30,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:31,hassan,Samsung,Lebanon,13:00,10.1.1.1,Legit,Safe
-2025-05-20 22:44:31,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:31,hassan,Samsung,Lebanon,11:00,10.0.0.5,Legit,Safe
-2025-05-20 22:44:32,hassan,Samsung,Lebanon,13:00,10.1.1.1,Legit,Safe
-2025-05-20 22:44:32,admin,iPhone,USA,15:00,10.0.0.10,Legit,Safe
-2025-05-20 22:44:33,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:33,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:33,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High
-2025-05-20 22:44:34,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
-2025-05-20 22:44:34,admin,iPhone,USA,15:00,10.0.0.10,Legit,Safe
-2025-05-20 22:44:35,hassan,Samsung,Lebanon,13:00,10.1.1.1,Legit,Safe
-2025-05-20 22:44:35,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
-2025-05-20 22:44:35,admin,iPhone,USA,15:00,10.0.0.10,Legit,Safe
-2025-05-20 22:44:36,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:36,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:36,hassan,Samsung,Lebanon,11:00,10.0.0.5,Legit,Safe
-2025-05-20 22:44:37,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
-2025-05-20 22:44:37,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:37,admin,iPhone,Lebanon,05:00,10.0.0.1,Attack,Safe
-2025-05-20 22:44:38,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
-2025-05-20 22:44:38,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:39,admin,iPhone,Lebanon,10:00,10.0.0.1,Legit,Safe
-2025-05-20 22:44:39,hassan,Samsung,Lebanon,13:00,10.1.1.1,Legit,Safe
-2025-05-20 22:44:39,hassan,Samsung,Lebanon,13:00,10.1.1.1,Legit,Safe
-2025-05-20 22:44:40,hassan,Samsung,Lebanon,11:00,10.0.0.5,Legit,Safe
-2025-05-20 22:44:40,hassan,Unknown,Brazil,02:00,89.12.45.67,Attack,High
-2025-05-20 22:44:41,maria,Samsung,Germany,23:00,185.44.12.1,Attack,High
-2025-05-20 22:44:41,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:41,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High
-2025-05-20 22:44:42,admin,iPhone,Lebanon,05:00,10.0.0.1,Attack,Safe
-2025-05-20 22:44:42,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High
-2025-05-20 22:44:42,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
-2025-05-20 22:44:43,hassan,Samsung,Lebanon,13:00,10.1.1.1,Legit,Safe
-2025-05-20 22:44:43,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High
-2025-05-20 22:44:44,hassan,Samsung,Lebanon,13:00,10.1.1.1,Legit,Safe
-2025-05-20 22:44:44,admin,iPhone,Lebanon,05:00,10.0.0.1,Attack,Safe
-2025-05-20 22:44:44,maria,Macbook,France,14:00,10.10.10.10,Legit,Safe
+timestamp,username,device,location,time,ip,actual,risk,reason,result
+2025-06-14 15:24:46,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:24:47,hassan,Android Device,Syria,01:00,185.44.12.88,Attack,High,Unusual mobile access at night,Correctly blocked attack (TP)
+2025-06-14 15:24:47,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:24:47,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:24:48,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:24:48,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:24:48,maria,Windows PC,Lebanon,11:30,10.0.0.3,Legit,Safe,Standard working login,Correctly allowed safe login (TN)
+2025-06-14 15:24:49,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:24:49,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:24:49,maria,Windows PC,Lebanon,11:30,10.0.0.3,Legit,Safe,Standard working login,Correctly allowed safe login (TN)
+2025-06-14 15:24:50,maria,Windows PC,Lebanon,11:30,10.0.0.3,Legit,Safe,Standard working login,Correctly allowed safe login (TN)
+2025-06-14 15:24:50,maria,Windows PC,Lebanon,11:30,10.0.0.3,Legit,Safe,Standard working login,Correctly allowed safe login (TN)
+2025-06-14 15:24:51,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:24:51,admin,Windows PC,Lebanon,10:00,10.0.0.1,Legit,Safe,Business hours login from Lebanon,Correctly allowed safe login (TN)
+2025-06-14 15:24:51,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:24:52,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:24:52,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:24:52,maria,Unknown,Brazil,02:00,89.12.45.67,Attack,High,Unknown device from foreign location,Correctly blocked attack (TP)
+2025-06-14 15:24:53,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:24:53,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:24:53,hassan,Android Device,Syria,01:00,185.44.12.88,Attack,High,Unusual mobile access at night,Correctly blocked attack (TP)
+2025-06-14 15:24:54,maria,Unknown,Brazil,02:00,89.12.45.67,Attack,High,Unknown device from foreign location,Correctly blocked attack (TP)
+2025-06-14 15:24:54,maria,Windows PC,Lebanon,11:30,10.0.0.3,Legit,Safe,Standard working login,Correctly allowed safe login (TN)
+2025-06-14 15:24:54,fares,Samsung,Lebanon,09:15,10.0.0.7,Legit,Safe,Morning regular user login,Correctly allowed safe login (TN)
+2025-06-14 15:24:55,hassan,Android Device,Syria,01:00,185.44.12.88,Attack,High,Unusual mobile access at night,Correctly blocked attack (TP)
+2025-06-14 15:24:55,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:24:55,maria,Unknown,Brazil,02:00,89.12.45.67,Attack,High,Unknown device from foreign location,Correctly blocked attack (TP)
+2025-06-14 15:24:56,maria,Windows PC,Lebanon,11:30,10.0.0.3,Legit,Safe,Standard working login,Correctly allowed safe login (TN)
+2025-06-14 15:24:56,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:24:57,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:24:57,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:24:58,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:24:58,fares,Samsung,Lebanon,09:15,10.0.0.7,Legit,Safe,Morning regular user login,Correctly allowed safe login (TN)
+2025-06-14 15:24:59,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:24:59,hassan,Android Device,Syria,01:00,185.44.12.88,Attack,High,Unusual mobile access at night,Correctly blocked attack (TP)
+2025-06-14 15:24:59,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:00,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:25:00,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:00,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:01,fares,Samsung,Lebanon,09:15,10.0.0.7,Legit,Safe,Morning regular user login,Correctly allowed safe login (TN)
+2025-06-14 15:25:01,hassan,Android Device,Syria,01:00,185.44.12.88,Attack,High,Unusual mobile access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:01,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:02,admin,Windows PC,Lebanon,10:00,10.0.0.1,Legit,Safe,Business hours login from Lebanon,Correctly allowed safe login (TN)
+2025-06-14 15:25:02,fares,Samsung,Lebanon,09:15,10.0.0.7,Legit,Safe,Morning regular user login,Correctly allowed safe login (TN)
+2025-06-14 15:25:02,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:25:03,admin,Windows PC,Lebanon,10:00,10.0.0.1,Legit,Safe,Business hours login from Lebanon,Correctly allowed safe login (TN)
+2025-06-14 15:25:03,hassan,Android Device,Syria,01:00,185.44.12.88,Attack,High,Unusual mobile access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:03,maria,Unknown,Brazil,02:00,89.12.45.67,Attack,High,Unknown device from foreign location,Correctly blocked attack (TP)
+2025-06-14 15:25:04,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:04,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:25:04,fares,Samsung,Lebanon,09:15,10.0.0.7,Legit,Safe,Morning regular user login,Correctly allowed safe login (TN)
+2025-06-14 15:25:05,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:25:05,maria,iPad,USA,02:30,99.48.12.12,Attack,Safe,Odd login hour and location,Missed attack (FN)
+2025-06-14 15:25:08,maria,iPad,USA,02:30,99.48.12.12,Attack,Safe,Odd login hour and location,Missed attack (FN)
+2025-06-14 15:25:08,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:25:09,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:25:09,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:10,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:10,admin,Windows PC,Lebanon,10:00,10.0.0.1,Legit,Safe,Business hours login from Lebanon,Correctly allowed safe login (TN)
+2025-06-14 15:25:11,fares,Samsung,Lebanon,09:15,10.0.0.7,Legit,Safe,Morning regular user login,Correctly allowed safe login (TN)
+2025-06-14 15:25:11,fares,Samsung,Lebanon,09:15,10.0.0.7,Legit,Safe,Morning regular user login,Correctly allowed safe login (TN)
+2025-06-14 15:25:11,admin,Windows PC,Lebanon,10:00,10.0.0.1,Legit,Safe,Business hours login from Lebanon,Correctly allowed safe login (TN)
+2025-06-14 15:25:12,hassan,Android Device,Syria,01:00,185.44.12.88,Attack,High,Unusual mobile access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:12,hassan,Android Device,Syria,01:00,185.44.12.88,Attack,High,Unusual mobile access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:12,maria,Unknown,Brazil,02:00,89.12.45.67,Attack,High,Unknown device from foreign location,Correctly blocked attack (TP)
+2025-06-14 15:25:13,maria,Unknown,Brazil,02:00,89.12.45.67,Attack,High,Unknown device from foreign location,Correctly blocked attack (TP)
+2025-06-14 15:25:13,maria,Windows PC,Lebanon,11:30,10.0.0.3,Legit,Safe,Standard working login,Correctly allowed safe login (TN)
+2025-06-14 15:25:13,admin,Windows PC,Lebanon,10:00,10.0.0.1,Legit,Safe,Business hours login from Lebanon,Correctly allowed safe login (TN)
+2025-06-14 15:25:14,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:25:14,maria,iPad,USA,02:30,99.48.12.12,Attack,Safe,Odd login hour and location,Missed attack (FN)
+2025-06-14 15:25:14,maria,Unknown,Brazil,02:00,89.12.45.67,Attack,High,Unknown device from foreign location,Correctly blocked attack (TP)
+2025-06-14 15:25:15,maria,Windows PC,Lebanon,11:30,10.0.0.3,Legit,Safe,Standard working login,Correctly allowed safe login (TN)
+2025-06-14 15:25:15,fares,Samsung,Lebanon,09:15,10.0.0.7,Legit,Safe,Morning regular user login,Correctly allowed safe login (TN)
+2025-06-14 15:25:15,maria,iPad,USA,02:30,99.48.12.12,Attack,Safe,Odd login hour and location,Missed attack (FN)
+2025-06-14 15:25:16,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:25:16,admin,Windows PC,Lebanon,10:00,10.0.0.1,Legit,Safe,Business hours login from Lebanon,Correctly allowed safe login (TN)
+2025-06-14 15:25:16,hassan,Mac,Lebanon,13:00,10.0.0.2,Legit,Safe,Regular login during working hours,Correctly allowed safe login (TN)
+2025-06-14 15:25:17,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:25:17,maria,Unknown,Brazil,02:00,89.12.45.67,Attack,High,Unknown device from foreign location,Correctly blocked attack (TP)
+2025-06-14 15:25:18,admin,Windows PC,Lebanon,10:00,10.0.0.1,Legit,Safe,Business hours login from Lebanon,Correctly allowed safe login (TN)
+2025-06-14 15:25:18,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:18,fares,Samsung,Lebanon,09:15,10.0.0.7,Legit,Safe,Morning regular user login,Correctly allowed safe login (TN)
+2025-06-14 15:25:19,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:19,fares,Samsung,Lebanon,09:15,10.0.0.7,Legit,Safe,Morning regular user login,Correctly allowed safe login (TN)
+2025-06-14 15:25:19,hassan,Android Device,Syria,01:00,185.44.12.88,Attack,High,Unusual mobile access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:20,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:25:20,admin,Windows PC,Lebanon,10:00,10.0.0.1,Legit,Safe,Business hours login from Lebanon,Correctly allowed safe login (TN)
+2025-06-14 15:25:21,hassan,Android Device,Syria,01:00,185.44.12.88,Attack,High,Unusual mobile access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:21,maria,Unknown,Brazil,02:00,89.12.45.67,Attack,High,Unknown device from foreign location,Correctly blocked attack (TP)
+2025-06-14 15:25:22,maria,Unknown,Brazil,02:00,89.12.45.67,Attack,High,Unknown device from foreign location,Correctly blocked attack (TP)
+2025-06-14 15:25:22,hassan,Android Device,Syria,01:00,185.44.12.88,Attack,High,Unusual mobile access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:22,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:25:23,maria,iPad,USA,02:30,99.48.12.12,Attack,Safe,Odd login hour and location,Missed attack (FN)
+2025-06-14 15:25:23,fares,Samsung,Lebanon,09:15,10.0.0.7,Legit,Safe,Morning regular user login,Correctly allowed safe login (TN)
+2025-06-14 15:25:23,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:25:24,admin,Windows PC,Lebanon,10:00,10.0.0.1,Legit,Safe,Business hours login from Lebanon,Correctly allowed safe login (TN)
+2025-06-14 15:25:24,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:25:24,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)
+2025-06-14 15:25:25,admin,Linux VM,Russia,03:00,185.76.23.5,Attack,High,Suspicious midnight login,Correctly blocked attack (TP)
+2025-06-14 15:25:25,john,Tor Browser,Iran,00:30,37.45.89.1,Attack,High,Tor access at night,Correctly blocked attack (TP)

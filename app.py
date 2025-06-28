@@ -935,89 +935,36 @@ def risk_panel():
     return make_response(render_template('risk_panel.html', risk_counts=risk_counts, role=session['role'] ))
 # --- Heatmap ---
 @app.route('/heatmap')
-
 @login_required()
-
 def heatmap():
-
     session['allowed_page'] = 'heatmap'
-
     conn = get_db_connection()
-
     cur = conn.cursor()
- 
-    page = request.args.get('page', 1, type=int)
 
-    per_page = 5
-
-    offset = (page - 1) * per_page
- 
-    date_filter = request.args.get('date')
-
-    filters = []
-
-    query = 'SELECT username, city, country, risk, login_time FROM access_logs WHERE 1=1'
- 
-    if date_filter:
-
-        query += ' AND DATE(login_time) = %s'
-
-        filters.append(date_filter)
- 
-    query += ' ORDER BY login_time DESC LIMIT %s OFFSET %s'
-
-    filters.extend([per_page, offset])
- 
-    cur.execute(query, tuple(filters))
-
-    logs = cur.fetchall()
- 
-    cur.execute('SELECT COUNT(*) FROM access_logs')
-
-    total_logs = cur.fetchone()[0]
-
-    has_next = (page * per_page) < total_logs
- 
+    cur.execute('SELECT username, ip, device, login_time FROM active_sessions')
+    sessions = cur.fetchall()
     conn.close()
- 
+
     logins = []
 
-    for log in logs:
-
+    for session_row in sessions:
         try:
-
-            location = f"{log[1]},{log[2]}"
-
-            response_geo = requests.get(f'https://nominatim.openstreetmap.org/search?q={location}&format=json')
-
+            ip = session_row[1]
+            response_geo = requests.get(f'https://ipinfo.io/{ip}/json')
             geo = response_geo.json()
-
-            lat = float(geo[0]['lat'])
-
-            lon = float(geo[0]['lon'])
-
+            lat, lon = map(float, geo['loc'].split(','))
         except:
-
-            lat, lon = 33.8547, 35.8623
- 
+            lat, lon = 33.8547, 35.8623  # Default to Lebanon
         logins.append({
-
-            'username': log[0],
-
-            'city': log[1],
-
-            'country': log[2],
-
-            'risk': log[3],
-
+            'username': session_row[0],
+            'ip': session_row[1],
+            'device': session_row[2],
+            'login_time': session_row[3],
             'lat': lat,
-
             'lon': lon
-
         })
- 
-    return make_response(render_template('heatmap.html', logins=logins, page=page, has_next=has_next,role=session['role']))
-# --- user work ---
+
+    return render_template('heatmap.html', logins=logins, role=session['role'])
 
 @app.route('/user_work')
 @login_required()

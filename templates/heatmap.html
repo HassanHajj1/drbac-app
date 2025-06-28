@@ -1,167 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Heatmap - DRBAC System</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<style>
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Active Users Heatmap - DRBAC System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>body {
+            background-color: #0d1117;
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: white;
+        }
 
-    body {
+        .navbar {
+            background-color: #161b22;
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+        }
 
-        background-color: #0d1117;
+        .navbar a {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: bold;
+        }
 
-        font-family: 'Orbitron', sans-serif;
+        .navbar a:hover {
+            color: #58a6ff;
+        }
 
-        margin: 0;
+        .container {
+            padding: 30px;
+            text-align: center;
+        }
 
-        padding: 0;
+        #map {
+            height: 500px;
+            width: 90%;
+            margin: 0 auto;
+            margin-top: 30px;
+            border: 2px solid #0d6efd;
+            border-radius: 10px;
+        }
+    </style></head><body>
 
-        color: white;
-
-    }
-
-    .navbar {
-
-        background-color: #161b22;
-
-        padding: 15px;
-
-        display: flex;
-
-        justify-content: space-around;
-
-    }
-
-    .navbar a {
-
-        color: #0d6efd;
-
-        text-decoration: none;
-
-        font-weight: bold;
-
-    }
-
-    .navbar a:hover {
-
-        color: #58a6ff;
-
-    }
-
-    .container {
-
-        padding: 30px;
-
-        text-align: center;
-
-    }
-
-    #map {
-
-        height: 500px;
-
-        width: 90%;
-
-        margin: 0 auto;
-
-        margin-top: 30px;
-
-        border: 2px solid #0d6efd;
-
-        border-radius: 10px;
-
-    }
-
-    .pagination {
-
-        margin-top: 20px;
-
-    }
-
-    .pagination a {
-
-        background-color: #0d6efd;
-
-        padding: 10px 20px;
-
-        color: white;
-
-        margin: 0 5px;
-
-        text-decoration: none;
-
-        border-radius: 5px;
-
-        font-weight: bold;
-
-    }
-
-    .pagination a:hover {
-
-        background-color: #0056b3;
-
-    }
-</style>
-</head>
-<body>
- 
     {% include 'navbar.html' %}
- 
-<div class="container">
-<h2>Login Heatmap</h2>
- 
+
+    <div class="container">
+        <h2>Active Users Heatmap</h2>
+        {% if logins %}
+        <div id="map"></div>
+        {% else %}
+        <p>No active sessions right now.</p>
+        {% endif %}
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
     {% if logins %}
-<div id="map"></div>
- 
-    <div class="pagination">
+    <script>        var map = L.map('map').setView([20, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+        }).addTo(map);
 
-        {% if page > 1 %}
-<a href="/heatmap?page={{ page - 1 }}">Previous</a>
-
-        {% endif %}
-
-        {% if has_next %}
-<a href="/heatmap?page={{ page + 1 }}">Next</a>
-
-        {% endif %}
-</div>
-
-    {% else %}
-<p>No login data available.</p>
-
+        var logins = {{ logins | tojson }};
+        logins.forEach(function(login) {
+            L.marker([login.lat, login.lon])
+                .addTo(map)
+                .bindPopup("<b>User:</b> " + login.username + "<br><b>IP:</b> " + login.ip + "<br><b>Device:</b> " + login.device + "<br><b>Login Time:</b> " + login.login_time);
+        });
+    </script>
     {% endif %}
-</div>
- 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
- 
-{% if logins %}
-<script>
-
-var map = L.map('map').setView([20, 0], 2);
- 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-
-    maxZoom: 18,
-
-}).addTo(map);
- 
-var logins = {{ logins|tojson }};
- 
-logins.forEach(function(login) {
-
-    L.marker([login.lat, login.lon])
-
-    .addTo(map)
-
-    .bindPopup("<b>User:</b> " + login.username + "<br><b>City:</b> " + login.city + "<br><b>Country:</b> " + login.country + "<br><b>Risk:</b> " + login.risk);
-
-});
-</script>
-
-{% endif %}
- 
-</body>
-</html>
-
- 
+</body></html>
