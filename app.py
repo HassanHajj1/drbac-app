@@ -16,6 +16,7 @@ from flask import jsonify
 import requests
 import bcrypt
 from utils import hash_password  
+from flask import Flask, request, jsonify
 
 def hash_password(plain_password):
     salt = bcrypt.gensalt()
@@ -175,11 +176,55 @@ def login_required(role=None):
         return decorated_function
     return wrapper
 
-@app.route('/simulate_login', methods=['POST'])
+
+app = Flask(__name__)
+
+def is_high_risk(device, location, time):
+
+    hour = int(time.split(":")[0])
+
+    risky_devices = ["Unknown", "Tor Browser", "Linux VM", "Android Device"]
+
+    risky_locations = ["Russia", "Iran", "Syria", "Brazil", "USA"]
+
+    risky_hours = list(range(0, 7)) + [23]
+
+    risk_score = 0
+
+    if device in risky_devices:
+
+        risk_score += 1
+
+    if location in risky_locations:
+
+        risk_score += 1
+
+    if hour in risky_hours:
+
+        risk_score += 1
+
+    return risk_score >= 2  # Adjustable threshold
+
+@app.route("/simulate_login", methods=["POST"])
+
 def simulate_login():
+
     data = request.json
-    risk = evaluate_risk(data)
-    return jsonify({"risk": risk}) 
+
+    device = data.get("device")
+
+    location = data.get("location")
+
+    time = data.get("time")
+
+    risk = "High" if is_high_risk(device, location, time) else "Low"
+
+    return jsonify({"risk": risk})
+
+if __name__ == "__main__":
+
+    app.run(debug=True)
+ 
 # --- Home ---
 @app.route('/')
 def home():

@@ -2,16 +2,16 @@ import requests
 import random
 import csv
 from datetime import datetime
-# 🌐 DRBAC deployed endpoint
-URL = "https://drbac-app-1.onrender.com/simulate_login"
-# 🧠 Realistic users for simulation
+# 🌐 Your deployed or local DRBAC endpoint
+URL = "http://localhost:5000/simulate_login"  # Change to your Render URL if deployed
+# 🧠 Simulated users (legit & attack)
 users = [
-   # ✅ Legit logins
+   # Legit logins
    {"username": "admin", "device": "Windows PC", "location": "Lebanon", "time": "10:00", "ip": "10.0.0.1", "is_attack": False, "reason": "Business hours login from Lebanon"},
    {"username": "hassan", "device": "Mac", "location": "Lebanon", "time": "13:00", "ip": "10.0.0.2", "is_attack": False, "reason": "Regular login during working hours"},
    {"username": "maria", "device": "Windows PC", "location": "Lebanon", "time": "11:30", "ip": "10.0.0.3", "is_attack": False, "reason": "Standard working login"},
    {"username": "fares", "device": "Samsung", "location": "Lebanon", "time": "09:15", "ip": "10.0.0.7", "is_attack": False, "reason": "Morning regular user login"},
-   # 🚨 Malicious logins
+   # Attacks
    {"username": "admin", "device": "Linux VM", "location": "Russia", "time": "03:00", "ip": "185.76.23.5", "is_attack": True, "reason": "Suspicious midnight login"},
    {"username": "maria", "device": "Unknown", "location": "Brazil", "time": "02:00", "ip": "89.12.45.67", "is_attack": True, "reason": "Unknown device from foreign location"},
    {"username": "john", "device": "Tor Browser", "location": "Iran", "time": "00:30", "ip": "37.45.89.1", "is_attack": True, "reason": "Tor access at night"},
@@ -34,13 +34,12 @@ def simulate():
            print(f"Error: {e}")
            continue
        predicted_attack = (risk == "High")
-       # Confusion matrix logic
        if ground_truth and predicted_attack:
            results["TP"] += 1
            detection_reason = "✔️ Correctly blocked attack (TP)"
        elif not ground_truth and predicted_attack:
            results["FP"] += 1
-           detection_reason = "⚠️ False alarm on legit user (FP)"
+           detection_reason = "❌ False alarm on legit user (FP)"
        elif not ground_truth and not predicted_attack:
            results["TN"] += 1
            detection_reason = "✅ Correctly allowed safe login (TN)"
@@ -60,19 +59,16 @@ def simulate():
            "reason": reason,
            "result": detection_reason
        })
-   # 🎯 Accuracy
    total = sum(results.values())
    accuracy = round(((results["TP"] + results["TN"]) / total) * 100, 2)
    print("\n==== Confusion Matrix ====")
    print(results)
    print(f"🎯 Detection Accuracy: {accuracy}%")
-   # ✅ Export to CSV with UTF-8 encoding
    with open("simulation_results.csv", "w", newline="", encoding="utf-8") as csvfile:
        fieldnames = ["timestamp", "username", "device", "location", "time", "ip", "actual", "risk", "reason", "result"]
        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
        writer.writeheader()
        writer.writerows(logs)
    print("✅ Results exported to 'simulation_results.csv'")
-   return results, accuracy
 if __name__ == "__main__":
    simulate()
