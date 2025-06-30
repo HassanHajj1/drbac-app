@@ -102,32 +102,54 @@ def add_no_cache(response):
     return response
  
 # --- Send Alert Email ---
+
 def send_alert_email(username, ip, country, city, device):
+
     msg = EmailMessage()
+
     msg['Subject'] = '🚨 DRBAC High-Risk Login Alert'
+
     msg['From'] = 'alerts@drbac.local'
+
     msg['To'] = 'admin@drbac-system.local'
+
     msg.set_content(f'''
+
 A high-risk login was detected:
- 
+
 👤 User: {username}
+
 🌍 Location: {city}, {country}
+
 🖥️ IP Address: {ip}
+
 📱 Device: {device}
- 
+
 ⚠️ Risk Level: HIGH
+
 Please review this activity immediately.
+
 ''')
  
     try:
-        with smtplib.SMTP('sandbox.smtp.mailtrap.io', 587) as smtp:
+
+        # Updated to new Mailtrap settings:
+
+        with smtplib.SMTP('smtp.mailtrap.io', 2525) as smtp:
+
             smtp.starttls()
-            smtp.login('53a9909633f5fe', '94fe03c1f616b2')
+
+            smtp.login('59cf39a2715f48', 'e3855425556a60')
+
             smtp.send_message(msg)
+
             print('✅ Mailtrap alert sent successfully!')
+
     except Exception as e:
+
         print(f'❌ Mailtrap send failed: {e}')
 
+ 
 # --- Decorator: Login Required ---
 def login_required(role=None):
     def wrapper(f):
