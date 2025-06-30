@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, send_file, make_response
 import psycopg2
 import socket
-from datetime import datetime
+from datetime import datetime, timedelta
 import csv
 import io
 import ipinfo
@@ -642,7 +642,7 @@ def start_lockdown():
     conn = get_db_connection()
     cur = conn.cursor()
     now = datetime.now()
-    end_time = now + datetime.timedelta(hours=6)  # lockdown lasts 6 hours
+    end_time = now + timedelta(hours=6)  # lockdown lasts 6 hours
     cur.execute('INSERT INTO system_lockdown (active, start_time, end_time) VALUES (TRUE, %s, %s)', (now, end_time))
     conn.commit()
     cur.close()
