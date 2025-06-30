@@ -2,16 +2,17 @@ import requests
 import random
 import csv
 from datetime import datetime
-# 🌐 Your deployed or local DRBAC endpoint
-URL = "http://localhost:5000/simulate_login"  # Change to your Render URL if deployed
-# 🧠 Simulated users (legit & attack)
+# 🌐 Your deployed DRBAC endpoint
+URL = "https://drbac-app-1.onrender.com/simulate_login"
+# 🧠 Realistic test users with rich variation
 users = [
    # Legit logins
    {"username": "admin", "device": "Windows PC", "location": "Lebanon", "time": "10:00", "ip": "10.0.0.1", "is_attack": False, "reason": "Business hours login from Lebanon"},
    {"username": "hassan", "device": "Mac", "location": "Lebanon", "time": "13:00", "ip": "10.0.0.2", "is_attack": False, "reason": "Regular login during working hours"},
    {"username": "maria", "device": "Windows PC", "location": "Lebanon", "time": "11:30", "ip": "10.0.0.3", "is_attack": False, "reason": "Standard working login"},
    {"username": "fares", "device": "Samsung", "location": "Lebanon", "time": "09:15", "ip": "10.0.0.7", "is_attack": False, "reason": "Morning regular user login"},
-   # Attacks
+   {"username": "maria", "device": "iPhone", "location": "Lebanon", "time": "12:00", "ip": "10.0.0.9", "is_attack": False, "reason": "Midday phone login"},
+   # Malicious logins
    {"username": "admin", "device": "Linux VM", "location": "Russia", "time": "03:00", "ip": "185.76.23.5", "is_attack": True, "reason": "Suspicious midnight login"},
    {"username": "maria", "device": "Unknown", "location": "Brazil", "time": "02:00", "ip": "89.12.45.67", "is_attack": True, "reason": "Unknown device from foreign location"},
    {"username": "john", "device": "Tor Browser", "location": "Iran", "time": "00:30", "ip": "37.45.89.1", "is_attack": True, "reason": "Tor access at night"},
@@ -21,7 +22,7 @@ users = [
 def simulate():
    results = {"TP": 0, "FP": 0, "TN": 0, "FN": 0}
    logs = []
-   for i in range(100):
+   for i in range(120):  # Increased iterations for better simulation
        original = random.choice(users)
        user = original.copy()
        ground_truth = user.pop("is_attack")
@@ -64,6 +65,7 @@ def simulate():
    print("\n==== Confusion Matrix ====")
    print(results)
    print(f"🎯 Detection Accuracy: {accuracy}%")
+   # Write to CSV with UTF-8 encoding to avoid errors
    with open("simulation_results.csv", "w", newline="", encoding="utf-8") as csvfile:
        fieldnames = ["timestamp", "username", "device", "location", "time", "ip", "actual", "risk", "reason", "result"]
        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
