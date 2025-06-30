@@ -232,7 +232,7 @@ def login():
 
         active, end_time = lockdown
 
-        if active and end_time > datetime.datetime.now():
+        if active and end_time > datetime.now():
 
             cur.execute('SELECT role FROM users WHERE username = %s', (username,))
 
